@@ -1,0 +1,91 @@
+# General
+.DS_Store
+Thumbs.db
+*.user
+*.suo
+*.swp
+*.lock
+*.tmp
+*.bak
+*.backup
+
+# Temporary files (debug/one-off utilities)
+temp-*.txt
+temp-*.html
+
+# Environment
+.env
+.env.*
+
+# VS/VSCode
+.vs/
+.vscode/*
+!.vscode/extensions.json
+
+# .NET
+**/bin/
+**/obj/
+**/TestResults/
+*.nupkg
+*.snupkg
+
+# Node / Frontend (root + frontend/)
+node_modules/
+dist/
+build/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.turbo/
+frontend/.parcel-cache/
+frontend/npm-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-lock.yaml
+frontend/coverage/
+
+# IDE
+.idea/
+
+# Coverage
+coverage/
+*.coverage*
+
+# Azure tooling
+.azd/
+.azure/
+
+# Bicep-generated ARM templates (use `az bicep build` to regenerate)
+infra/*.json
+
+# Reports artifacts (keep repo clean; scripts can export elsewhere)
+reports/*.md
+!reports/.gitkeep
+
+# Data (simulated inputs)
+data/**
+!data/wishlist-events/.gitkeep
+
+# Test files
+TEST*.txt
+TEST*.md
+
+# Kubernetes dumps (use kubectl get instead)
+dep-*.yaml
+
+# Build/deployment artifacts (publish via GitHub Releases or CI artifacts)
+*-app.zip
+*.zip
+*.tar.gz
+
+# Log files
+*.log
+
+# Deployment logs and transient output
+deployment-log*.txt
+drasi-deploy-log.txt
+provision-error.txt
+temp-logs.txt
+# Drasi regenerated outputs (use drasi/manifests/ as canonical source)
+drasi-generated/
+drasi-manifests/
+drasi/generated/

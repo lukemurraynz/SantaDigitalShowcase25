@@ -1,0 +1,16 @@
+kind: ContinuousQuery
+apiVersion: v1
+name: recommendation-trending-30m
+spec:
+  mode: query
+  queryLanguage: Cypher
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+        nodes:
+          - sourceLabel: WishlistItem
+  query: |
+    MATCH (w:WishlistItem)
+    WITH w.text AS item, w.childId AS childId
+    WITH item, collect(distinct childId) AS children
+    RETURN item, children

@@ -1,0 +1,337 @@
+LAST SEEN   TYPE      REASON                   OBJECT                                          MESSAGE
+61m         Normal    Scheduled                pod/drasi-resource-provider-58f69699f-56d58     Successfully assigned drasi-system/drasi-resource-provider-58f69699f-56d58 to aks-system-12296413-vmss000001
+61m         Normal    Scheduled                pod/drasi-api-698fd9bfd6-5nlt9                  Successfully assigned drasi-system/drasi-api-698fd9bfd6-5nlt9 to aks-system-12296413-vmss000001
+60m         Normal    Started                  pod/drasi-api-698fd9bfd6-5nlt9                  Started container drasi-api
+60m         Normal    Pulled                   pod/drasi-api-698fd9bfd6-5nlt9                  Container image "ghcr.io/drasi-project/api:0.9.2" already present on machine
+60m         Normal    Created                  pod/drasi-resource-provider-58f69699f-56d58     Created container: daprd
+60m         Normal    Started                  pod/drasi-resource-provider-58f69699f-56d58     Started container kubernetes-provider
+60m         Normal    Pulled                   pod/drasi-resource-provider-58f69699f-56d58     Container image "ghcr.io/drasi-project/kubernetes-provider:0.9.2" already present on machine
+60m         Normal    Created                  pod/drasi-api-698fd9bfd6-5nlt9                  Created container: daprd
+60m         Normal    Killing                  pod/drasi-api-6dd754686f-k62cw                  Stopping container daprd
+60m         Normal    Killing                  pod/drasi-resource-provider-587b9d9676-j5j22    Stopping container daprd
+60m         Warning   Unhealthy                pod/drasi-resource-provider-587b9d9676-j5j22    Readiness probe failed: Get "http://10.224.0.39:3501/v1.0/healthz": dial tcp 10.224.0.39:3501: connect: connection refused
+59m         Normal    SuccessfulCreate         replicaset/drasi-api-67ff9cbf55                 Created pod: drasi-api-67ff9cbf55-wzf4r
+59m         Normal    Scheduled                pod/drasi-api-67ff9cbf55-wzf4r                  Successfully assigned drasi-system/drasi-api-67ff9cbf55-wzf4r to aks-system-12296413-vmss000000
+59m         Normal    SuccessfulCreate         replicaset/drasi-resource-provider-58db46cb66   Created pod: drasi-resource-provider-58db46cb66-l4k9q
+59m         Normal    Scheduled                pod/drasi-resource-provider-58db46cb66-l4k9q    Successfully assigned drasi-system/drasi-resource-provider-58db46cb66-l4k9q to aks-system-12296413-vmss000001
+59m         Normal    Started                  pod/drasi-resource-provider-58db46cb66-l4k9q    Started container kubernetes-provider
+59m         Normal    Pulled                   pod/drasi-resource-provider-58db46cb66-l4k9q    Container image "daprio/daprd:1.14.5" already present on machine
+59m         Normal    Created                  pod/drasi-resource-provider-58db46cb66-l4k9q    Created container: kubernetes-provider
+59m         Normal    Pulled                   pod/drasi-resource-provider-58db46cb66-l4k9q    Container image "ghcr.io/drasi-project/kubernetes-provider:0.9.2" already present on machine
+59m         Normal    Created                  pod/drasi-resource-provider-58db46cb66-l4k9q    Created container: daprd
+59m         Normal    Pulling                  pod/drasi-api-67ff9cbf55-wzf4r                  Pulling image "ghcr.io/drasi-project/api:0.9.2"
+59m         Normal    Started                  pod/drasi-resource-provider-58db46cb66-l4k9q    Started container daprd
+59m         Normal    Pulled                   pod/drasi-api-67ff9cbf55-wzf4r                  Container image "daprio/daprd:1.14.5" already present on machine
+59m         Normal    Pulled                   pod/drasi-api-67ff9cbf55-wzf4r                  Successfully pulled image "ghcr.io/drasi-project/api:0.9.2" in 3.353s (3.353s including waiting). Image size: 19687124 bytes.
+59m         Normal    Created                  pod/drasi-api-67ff9cbf55-wzf4r                  Created container: drasi-api
+59m         Normal    Started                  pod/drasi-api-67ff9cbf55-wzf4r                  Started container drasi-api
+59m         Normal    Created                  pod/drasi-api-67ff9cbf55-wzf4r                  Created container: daprd
+59m         Normal    Started                  pod/drasi-api-67ff9cbf55-wzf4r                  Started container daprd
+59m         Warning   Unhealthy                pod/drasi-resource-provider-58db46cb66-l4k9q    Liveness probe failed: HTTP probe failed with statuscode: 500
+59m         Warning   Unhealthy                pod/drasi-api-67ff9cbf55-wzf4r                  Liveness probe failed: HTTP probe failed with statuscode: 500
+59m         Normal    SuccessfulDelete         replicaset/drasi-resource-provider-58f69699f    Deleted pod: drasi-resource-provider-58f69699f-56d58
+59m         Normal    ScalingReplicaSet        deployment/drasi-resource-provider              (combined from similar events): Scaled down replica set drasi-resource-provider-58f69699f from 1 to 0
+59m         Normal    Killing                  pod/drasi-resource-provider-58f69699f-56d58     Stopping container kubernetes-provider
+59m         Normal    Killing                  pod/drasi-resource-provider-58f69699f-56d58     Stopping container daprd
+59m         Normal    Killing                  pod/drasi-api-698fd9bfd6-5nlt9                  Stopping container daprd
+59m         Normal    Killing                  pod/drasi-api-698fd9bfd6-5nlt9                  Stopping container drasi-api
+59m         Normal    SuccessfulDelete         replicaset/drasi-api-698fd9bfd6                 Deleted pod: drasi-api-698fd9bfd6-5nlt9
+59m         Normal    ScalingReplicaSet        deployment/drasi-api                            (combined from similar events): Scaled down replica set drasi-api-698fd9bfd6 from 1 to 0
+59m         Warning   Unhealthy                pod/drasi-resource-provider-58f69699f-56d58     Readiness probe failed: Get "http://10.224.0.14:3501/v1.0/healthz": dial tcp 10.224.0.14:3501: connect: connection refused
+42m         Normal    Killing                  pod/drasi-redis-0                               Stopping container redis
+42m         Normal    ScalingReplicaSet        deployment/drasi-resource-provider              Scaled up replica set drasi-resource-provider-7bd77766b4 from 0 to 1
+42m         Normal    Killing                  pod/drasi-mongo-0                               Stopping container mongo
+42m         Normal    Scheduled                pod/drasi-redis-0                               Successfully assigned drasi-system/drasi-redis-0 to aks-system-12296413-vmss000001
+42m         Normal    ScalingReplicaSet        deployment/drasi-api                            Scaled up replica set drasi-api-7b6665c857 from 0 to 1
+42m         Normal    Scheduled                pod/drasi-api-7b6665c857-gtfzr                  Successfully assigned drasi-system/drasi-api-7b6665c857-gtfzr to aks-system-12296413-vmss000000
+42m         Normal    Pulling                  pod/drasi-resource-provider-7bd77766b4-62qcr    Pulling image "ghcr.io/drasi-project/kubernetes-provider:0.10.0"
+42m         Normal    Pulling                  pod/drasi-api-7b6665c857-gtfzr                  Pulling image "ghcr.io/drasi-project/api:0.10.0"
+42m         Normal    SuccessfulCreate         replicaset/drasi-resource-provider-7bd77766b4   Created pod: drasi-resource-provider-7bd77766b4-62qcr
+42m         Normal    Scheduled                pod/drasi-resource-provider-7bd77766b4-62qcr    Successfully assigned drasi-system/drasi-resource-provider-7bd77766b4-62qcr to aks-system-12296413-vmss000001
+42m         Normal    Scheduled                pod/drasi-mongo-0                               Successfully assigned drasi-system/drasi-mongo-0 to aks-system-12296413-vmss000000
+42m         Normal    SuccessfulCreate         replicaset/drasi-api-7b6665c857                 Created pod: drasi-api-7b6665c857-gtfzr
+42m         Normal    SuccessfulDelete         replicaset/drasi-api-7b6665c857                 Deleted pod: drasi-api-7b6665c857-gtfzr
+42m         Normal    ScalingReplicaSet        deployment/drasi-api                            Scaled down replica set drasi-api-7b6665c857 from 1 to 0
+42m         Normal    Pulled                   pod/drasi-mongo-0                               Container image "ghcr.io/drasi-project/mongo:6" already present on machine
+42m         Normal    Created                  pod/drasi-mongo-0                               Created container: mongo
+42m         Normal    Started                  pod/drasi-mongo-0                               Started container mongo
+42m         Normal    SuccessfulDelete         replicaset/drasi-resource-provider-7bd77766b4   Deleted pod: drasi-resource-provider-7bd77766b4-62qcr
+42m         Normal    ScalingReplicaSet        deployment/drasi-resource-provider              Scaled down replica set drasi-resource-provider-7bd77766b4 from 1 to 0
+42m         Normal    Created                  pod/drasi-resource-provider-7bd77766b4-62qcr    Created container: daprd
+42m         Normal    Created                  pod/drasi-resource-provider-7bd77766b4-62qcr    Created container: kubernetes-provider
+42m         Normal    Started                  pod/drasi-resource-provider-7bd77766b4-62qcr    Started container daprd
+42m         Normal    Pulled                   pod/drasi-resource-provider-7bd77766b4-62qcr    Successfully pulled image "ghcr.io/drasi-project/kubernetes-provider:0.10.0" in 2.966s (2.966s including waiting). Image size: 16090037 bytes.
+42m         Normal    Pulled                   pod/drasi-resource-provider-7bd77766b4-62qcr    Container image "daprio/daprd:1.14.5" already present on machine
+42m         Normal    Started                  pod/drasi-resource-provider-7bd77766b4-62qcr    Started container kubernetes-provider
+42m         Normal    Killing                  pod/drasi-api-7b6665c857-gtfzr                  Stopping container daprd
+42m         Normal    Created                  pod/drasi-api-7b6665c857-gtfzr                  Created container: drasi-api
+42m         Normal    Pulled                   pod/drasi-api-7b6665c857-gtfzr                  Container image "daprio/daprd:1.14.5" already present on machine
+42m         Normal    Killing                  pod/drasi-resource-provider-7bd77766b4-62qcr    Stopping container daprd
+42m         Normal    Created                  pod/drasi-api-7b6665c857-gtfzr                  Created container: daprd
+42m         Normal    Killing                  pod/drasi-resource-provider-7bd77766b4-62qcr    Stopping container kubernetes-provider
+42m         Normal    Started                  pod/drasi-api-7b6665c857-gtfzr                  Started container drasi-api
+42m         Normal    Killing                  pod/drasi-mongo-0                               Stopping container mongo
+42m         Normal    Started                  pod/drasi-api-7b6665c857-gtfzr                  Started container daprd
+42m         Normal    Killing                  pod/drasi-api-7b6665c857-gtfzr                  Stopping container drasi-api
+42m         Normal    Pulled                   pod/drasi-api-7b6665c857-gtfzr                  Successfully pulled image "ghcr.io/drasi-project/api:0.10.0" in 3.36s (3.36s including waiting). Image size: 19666209 bytes.
+42m         Normal    Scheduled                pod/drasi-mongo-0                               Successfully assigned drasi-system/drasi-mongo-0 to aks-system-12296413-vmss000000
+42m         Normal    Started                  pod/drasi-mongo-0                               Started container mongo
+42m         Normal    Created                  pod/drasi-mongo-0                               Created container: mongo
+42m         Normal    Pulled                   pod/drasi-mongo-0                               Container image "ghcr.io/drasi-project/mongo:6" already present on machine
+42m         Normal    Scheduled                pod/default-query-host-6648c44f9-cqnmv          Successfully assigned drasi-system/default-query-host-6648c44f9-cqnmv to aks-system-12296413-vmss000001
+42m         Normal    SuccessfulCreate         replicaset/default-query-host-6648c44f9         Created pod: default-query-host-6648c44f9-cqnmv
+42m         Normal    SuccessfulCreate         replicaset/default-publish-api-7997dbd966       Created pod: default-publish-api-7997dbd966-xsg95
+42m         Normal    ScalingReplicaSet        deployment/default-query-host                   Scaled up replica set default-query-host-6648c44f9 from 0 to 1
+42m         Normal    Scheduled                pod/default-view-svc-59cc5cf78b-c64fq           Successfully assigned drasi-system/default-view-svc-59cc5cf78b-c64fq to aks-system-12296413-vmss000000
+42m         Normal    ScalingReplicaSet        deployment/default-view-svc                     Scaled up replica set default-view-svc-59cc5cf78b from 0 to 1
+42m         Normal    SuccessfulCreate         replicaset/default-view-svc-59cc5cf78b          Created pod: default-view-svc-59cc5cf78b-c64fq
+42m         Normal    Scheduled                pod/default-publish-api-7997dbd966-xsg95        Successfully assigned drasi-system/default-publish-api-7997dbd966-xsg95 to aks-system-12296413-vmss000001
+42m         Normal    ScalingReplicaSet        deployment/default-publish-api                  Scaled up replica set default-publish-api-7997dbd966 from 0 to 1
+42m         Normal    Pulling                  pod/default-query-host-6648c44f9-cqnmv          Pulling image "daprio/daprd:1.9.0"
+42m         Normal    Pulling                  pod/default-view-svc-59cc5cf78b-c64fq           Pulling image "daprio/daprd:1.9.0"
+42m         Normal    Pulling                  pod/default-publish-api-7997dbd966-xsg95        Pulling image "daprio/daprd:1.9.0"
+42m         Normal    SuccessfulAttachVolume   pod/drasi-redis-0                               AttachVolume.Attach succeeded for volume "pvc-7ea01195-d628-40ef-9051-b61a32d21271"
+42m         Normal    Created                  pod/drasi-redis-0                               Created container: redis
+42m         Normal    Pulled                   pod/drasi-redis-0                               Container image "ghcr.io/drasi-project/redis:7-alpine" already present on machine
+42m         Normal    Started                  pod/drasi-redis-0                               Started container redis
+42m         Normal    Pulled                   pod/default-publish-api-7997dbd966-xsg95        Successfully pulled image "daprio/daprd:1.9.0" in 5.248s (5.248s including waiting). Image size: 38393280 bytes.
+42m         Normal    Pulled                   pod/default-view-svc-59cc5cf78b-c64fq           Successfully pulled image "daprio/daprd:1.9.0" in 5.35s (5.35s including waiting). Image size: 38393280 bytes.
+42m         Normal    Pulled                   pod/default-query-host-6648c44f9-cqnmv          Successfully pulled image "daprio/daprd:1.9.0" in 5.232s (5.232s including waiting). Image size: 38393280 bytes.
+42m         Normal    Killing                  pod/drasi-redis-0                               Stopping container redis
+42m         Normal    Scheduled                pod/drasi-redis-0                               Successfully assigned drasi-system/drasi-redis-0 to aks-system-12296413-vmss000001
+42m         Normal    Created                  pod/drasi-redis-0                               Created container: redis
+42m         Normal    Started                  pod/drasi-redis-0                               Started container redis
+42m         Normal    Pulled                   pod/drasi-redis-0                               Container image "ghcr.io/drasi-project/redis:7-alpine" already present on machine
+41m         Normal    Started                  pod/default-query-host-6648c44f9-cqnmv          Started container daprd
+41m         Normal    Started                  pod/default-publish-api-7997dbd966-xsg95        Started container daprd
+41m         Normal    Pulling                  pod/default-publish-api-7997dbd966-xsg95        Pulling image "drasi-project/query-container-publish-api:latest"
+41m         Warning   Failed                   pod/default-publish-api-7997dbd966-xsg95        Error: ErrImagePull
+41m         Warning   Failed                   pod/default-publish-api-7997dbd966-xsg95        Failed to pull image "drasi-project/query-container-publish-api:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-publish-api:latest": failed to resolve reference "docker.io/drasi-project/query-container-publish-api:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+41m         Normal    Pulling                  pod/default-query-host-6648c44f9-cqnmv          Pulling image "drasi-project/query-container-query-host:latest"
+41m         Warning   Failed                   pod/default-query-host-6648c44f9-cqnmv          Failed to pull image "drasi-project/query-container-query-host:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-query-host:latest": failed to resolve reference "docker.io/drasi-project/query-container-query-host:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+41m         Warning   BackOff                  pod/default-query-host-6648c44f9-cqnmv          Back-off restarting failed container daprd in pod default-query-host-6648c44f9-cqnmv_drasi-system(a786c0ec-9987-4533-94fd-1689b71c1ceb)
+41m         Warning   Failed                   pod/default-query-host-6648c44f9-cqnmv          Error: ErrImagePull
+41m         Normal    Pulling                  pod/default-view-svc-59cc5cf78b-c64fq           Pulling image "drasi-project/query-container-view-svc:latest"
+41m         Normal    Pulled                   pod/default-view-svc-59cc5cf78b-c64fq           Container image "daprio/daprd:1.9.0" already present on machine
+41m         Warning   Failed                   pod/default-view-svc-59cc5cf78b-c64fq           Failed to pull image "drasi-project/query-container-view-svc:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-view-svc:latest": failed to resolve reference "docker.io/drasi-project/query-container-view-svc:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+41m         Warning   Failed                   pod/default-view-svc-59cc5cf78b-c64fq           Error: ErrImagePull
+41m         Normal    Created                  pod/default-view-svc-59cc5cf78b-c64fq           Created container: daprd
+41m         Normal    Started                  pod/default-view-svc-59cc5cf78b-c64fq           Started container daprd
+41m         Warning   BackOff                  pod/default-view-svc-59cc5cf78b-c64fq           Back-off restarting failed container daprd in pod default-view-svc-59cc5cf78b-c64fq_drasi-system(2cb740e2-3280-4708-8518-ba1fa7462ce6)
+41m         Warning   BackOff                  pod/default-publish-api-7997dbd966-xsg95        Back-off restarting failed container daprd in pod default-publish-api-7997dbd966-xsg95_drasi-system(09519167-60c6-4dc5-a6e5-0648bf5a4fbf)
+41m         Normal    Created                  pod/default-query-host-6648c44f9-cqnmv          Created container: daprd
+41m         Normal    Pulled                   pod/default-query-host-6648c44f9-cqnmv          Container image "daprio/daprd:1.9.0" already present on machine
+41m         Normal    Created                  pod/default-publish-api-7997dbd966-xsg95        Created container: daprd
+41m         Normal    Pulled                   pod/default-publish-api-7997dbd966-xsg95        Container image "daprio/daprd:1.9.0" already present on machine
+40m         Normal    ScalingReplicaSet        deployment/drasi-api                            Scaled up replica set drasi-api-6999764d79 from 0 to 1
+40m         Normal    Scheduled                pod/drasi-resource-provider-7858d77494-fck2s    Successfully assigned drasi-system/drasi-resource-provider-7858d77494-fck2s to aks-system-12296413-vmss000001
+40m         Normal    SuccessfulCreate         replicaset/drasi-resource-provider-7858d77494   Created pod: drasi-resource-provider-7858d77494-fck2s
+40m         Normal    ScalingReplicaSet        deployment/drasi-resource-provider              Scaled up replica set drasi-resource-provider-7858d77494 from 0 to 1
+40m         Normal    SuccessfulCreate         replicaset/drasi-api-6999764d79                 Created pod: drasi-api-6999764d79-g68dv
+40m         Normal    Scheduled                pod/drasi-api-6999764d79-g68dv                  Successfully assigned drasi-system/drasi-api-6999764d79-g68dv to aks-system-12296413-vmss000000
+40m         Normal    Pulled                   pod/drasi-api-6999764d79-g68dv                  Container image "daprio/daprd:1.14.5" already present on machine
+40m         Normal    Pulled                   pod/drasi-resource-provider-7858d77494-fck2s    Container image "ghcr.io/drasi-project/kubernetes-provider:0.9.2" already present on machine
+40m         Normal    Pulled                   pod/drasi-api-6999764d79-g68dv                  Container image "ghcr.io/drasi-project/api:0.9.2" already present on machine
+40m         Normal    Created                  pod/drasi-api-6999764d79-g68dv                  Created container: drasi-api
+40m         Normal    Started                  pod/drasi-api-6999764d79-g68dv                  Started container drasi-api
+40m         Normal    Created                  pod/drasi-api-6999764d79-g68dv                  Created container: daprd
+40m         Normal    Started                  pod/drasi-api-6999764d79-g68dv                  Started container daprd
+40m         Normal    Started                  pod/drasi-resource-provider-7858d77494-fck2s    Started container daprd
+40m         Normal    Created                  pod/drasi-resource-provider-7858d77494-fck2s    Created container: daprd
+40m         Normal    Pulled                   pod/drasi-resource-provider-7858d77494-fck2s    Container image "daprio/daprd:1.14.5" already present on machine
+40m         Normal    Started                  pod/drasi-resource-provider-7858d77494-fck2s    Started container kubernetes-provider
+40m         Normal    Created                  pod/drasi-resource-provider-7858d77494-fck2s    Created container: kubernetes-provider
+40m         Warning   Unhealthy                pod/drasi-api-6999764d79-g68dv                  Readiness probe failed: HTTP probe failed with statuscode: 500
+40m         Warning   Unhealthy                pod/drasi-resource-provider-7858d77494-fck2s    Liveness probe failed: HTTP probe failed with statuscode: 500
+40m         Normal    SuccessfulDelete         replicaset/drasi-resource-provider-58db46cb66   Deleted pod: drasi-resource-provider-58db46cb66-l4k9q
+40m         Normal    Killing                  pod/drasi-resource-provider-58db46cb66-l4k9q    Stopping container daprd
+40m         Normal    ScalingReplicaSet        deployment/drasi-resource-provider              Scaled down replica set drasi-resource-provider-58db46cb66 from 1 to 0
+40m         Normal    Killing                  pod/drasi-resource-provider-58db46cb66-l4k9q    Stopping container kubernetes-provider
+40m         Normal    SuccessfulDelete         replicaset/drasi-api-67ff9cbf55                 Deleted pod: drasi-api-67ff9cbf55-wzf4r
+40m         Normal    Killing                  pod/drasi-api-67ff9cbf55-wzf4r                  Stopping container daprd
+40m         Normal    Killing                  pod/drasi-api-67ff9cbf55-wzf4r                  Stopping container drasi-api
+40m         Normal    ScalingReplicaSet        deployment/drasi-api                            Scaled down replica set drasi-api-67ff9cbf55 from 1 to 0
+40m         Warning   Unhealthy                pod/drasi-resource-provider-58db46cb66-l4k9q    Readiness probe failed: Get "http://10.224.0.32:3501/v1.0/healthz": dial tcp 10.224.0.32:3501: connect: connection refused
+32m         Normal    ScalingReplicaSet        deployment/default-publish-api                  Scaled up replica set default-publish-api-54d488cf5f from 0 to 1
+32m         Normal    SuccessfulCreate         replicaset/default-publish-api-54d488cf5f       Created pod: default-publish-api-54d488cf5f-2smnr
+32m         Normal    ScalingReplicaSet        deployment/default-query-host                   Scaled up replica set default-query-host-5c9b69855d from 0 to 1
+32m         Normal    Scheduled                pod/default-query-host-5c9b69855d-rhc7c         Successfully assigned drasi-system/default-query-host-5c9b69855d-rhc7c to aks-system-12296413-vmss000001
+32m         Normal    SuccessfulCreate         replicaset/default-query-host-5c9b69855d        Created pod: default-query-host-5c9b69855d-rhc7c
+32m         Normal    Scheduled                pod/default-publish-api-54d488cf5f-2smnr        Successfully assigned drasi-system/default-publish-api-54d488cf5f-2smnr to aks-system-12296413-vmss000000
+32m         Normal    ScalingReplicaSet        deployment/default-view-svc                     Scaled up replica set default-view-svc-8698f5ff6c from 0 to 1
+32m         Normal    Scheduled                pod/default-view-svc-8698f5ff6c-z9jxh           Successfully assigned drasi-system/default-view-svc-8698f5ff6c-z9jxh to aks-system-12296413-vmss000000
+32m         Normal    SuccessfulCreate         replicaset/default-view-svc-8698f5ff6c          Created pod: default-view-svc-8698f5ff6c-z9jxh
+31m         Normal    Pulling                  pod/default-view-svc-8698f5ff6c-z9jxh           Pulling image "drasi-project/query-container-view-svc:latest"
+31m         Warning   Failed                   pod/default-view-svc-8698f5ff6c-z9jxh           Failed to pull image "drasi-project/query-container-view-svc:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-view-svc:latest": failed to resolve reference "docker.io/drasi-project/query-container-view-svc:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+31m         Normal    Pulling                  pod/default-publish-api-54d488cf5f-2smnr        Pulling image "drasi-project/query-container-publish-api:latest"
+31m         Normal    Started                  pod/default-view-svc-8698f5ff6c-z9jxh           Started container daprd
+31m         Normal    Created                  pod/default-view-svc-8698f5ff6c-z9jxh           Created container: daprd
+31m         Normal    Pulled                   pod/default-view-svc-8698f5ff6c-z9jxh           Container image "daprio/daprd:1.9.0" already present on machine
+31m         Warning   Failed                   pod/default-view-svc-8698f5ff6c-z9jxh           Error: ErrImagePull
+31m         Normal    Pulled                   pod/default-publish-api-54d488cf5f-2smnr        Container image "daprio/daprd:1.9.0" already present on machine
+31m         Normal    Started                  pod/default-publish-api-54d488cf5f-2smnr        Started container daprd
+31m         Warning   Failed                   pod/default-publish-api-54d488cf5f-2smnr        Error: ErrImagePull
+31m         Warning   Failed                   pod/default-publish-api-54d488cf5f-2smnr        Failed to pull image "drasi-project/query-container-publish-api:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-publish-api:latest": failed to resolve reference "docker.io/drasi-project/query-container-publish-api:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+31m         Normal    Created                  pod/default-publish-api-54d488cf5f-2smnr        Created container: daprd
+31m         Normal    Pulling                  pod/default-query-host-5c9b69855d-rhc7c         Pulling image "drasi-project/query-container-query-host:latest"
+31m         Warning   Failed                   pod/default-query-host-5c9b69855d-rhc7c         Error: ErrImagePull
+31m         Warning   BackOff                  pod/default-view-svc-8698f5ff6c-z9jxh           Back-off restarting failed container daprd in pod default-view-svc-8698f5ff6c-z9jxh_drasi-system(da09fbb3-3cbd-42a0-bf3b-b0023ea90af8)
+31m         Normal    Created                  pod/default-query-host-5c9b69855d-rhc7c         Created container: daprd
+31m         Normal    Started                  pod/default-query-host-5c9b69855d-rhc7c         Started container daprd
+31m         Warning   Failed                   pod/default-query-host-5c9b69855d-rhc7c         Failed to pull image "drasi-project/query-container-query-host:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-query-host:latest": failed to resolve reference "docker.io/drasi-project/query-container-query-host:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+31m         Normal    Pulled                   pod/default-query-host-5c9b69855d-rhc7c         Container image "daprio/daprd:1.9.0" already present on machine
+31m         Warning   BackOff                  pod/default-publish-api-54d488cf5f-2smnr        Back-off restarting failed container daprd in pod default-publish-api-54d488cf5f-2smnr_drasi-system(69b093b8-63b0-402f-89c2-f746cea35c1d)
+31m         Warning   BackOff                  pod/default-query-host-5c9b69855d-rhc7c         Back-off restarting failed container daprd in pod default-query-host-5c9b69855d-rhc7c_drasi-system(657816d9-71e8-4b2f-952b-384bb6af2fd9)
+26m         Normal    Killing                  pod/drasi-mongo-0                               Stopping container mongo
+26m         Normal    Killing                  pod/drasi-redis-0                               Stopping container redis
+26m         Normal    SuccessfulCreate         replicaset/drasi-resource-provider-587fbbb564   Created pod: drasi-resource-provider-587fbbb564-cpc2n
+26m         Normal    ScalingReplicaSet        deployment/drasi-api                            Scaled up replica set drasi-api-6cbd7ccbd5 from 0 to 1
+26m         Normal    ScalingReplicaSet        deployment/drasi-resource-provider              Scaled up replica set drasi-resource-provider-587fbbb564 from 0 to 1
+26m         Normal    Scheduled                pod/drasi-redis-0                               Successfully assigned drasi-system/drasi-redis-0 to aks-system-12296413-vmss000001
+26m         Normal    Scheduled                pod/drasi-resource-provider-587fbbb564-cpc2n    Successfully assigned drasi-system/drasi-resource-provider-587fbbb564-cpc2n to aks-system-12296413-vmss000000
+26m         Normal    SuccessfulCreate         replicaset/drasi-api-6cbd7ccbd5                 Created pod: drasi-api-6cbd7ccbd5-r9g6h
+26m         Normal    Scheduled                pod/drasi-api-6cbd7ccbd5-r9g6h                  Successfully assigned drasi-system/drasi-api-6cbd7ccbd5-r9g6h to aks-system-12296413-vmss000000
+26m         Normal    Scheduled                pod/drasi-mongo-0                               Successfully assigned drasi-system/drasi-mongo-0 to aks-system-12296413-vmss000000
+26m         Normal    Pulling                  pod/drasi-api-6cbd7ccbd5-r9g6h                  Pulling image "ghcr.io/drasi-project/api:0.10.0"
+26m         Normal    Pulling                  pod/drasi-resource-provider-587fbbb564-cpc2n    Pulling image "ghcr.io/drasi-project/kubernetes-provider:0.10.0"
+26m         Normal    Started                  pod/drasi-resource-provider-587fbbb564-cpc2n    Started container kubernetes-provider
+26m         Normal    Created                  pod/drasi-resource-provider-587fbbb564-cpc2n    Created container: kubernetes-provider
+26m         Normal    Created                  pod/drasi-api-6cbd7ccbd5-r9g6h                  Created container: drasi-api
+26m         Normal    Started                  pod/drasi-api-6cbd7ccbd5-r9g6h                  Started container drasi-api
+26m         Normal    Pulled                   pod/drasi-api-6cbd7ccbd5-r9g6h                  Container image "daprio/daprd:1.14.5" already present on machine
+26m         Normal    Created                  pod/drasi-api-6cbd7ccbd5-r9g6h                  Created container: daprd
+26m         Normal    Started                  pod/drasi-api-6cbd7ccbd5-r9g6h                  Started container daprd
+26m         Normal    ScalingReplicaSet        deployment/drasi-resource-provider              Scaled down replica set drasi-resource-provider-587fbbb564 from 1 to 0
+26m         Normal    SuccessfulDelete         replicaset/drasi-resource-provider-587fbbb564   Deleted pod: drasi-resource-provider-587fbbb564-cpc2n
+26m         Normal    Started                  pod/drasi-resource-provider-587fbbb564-cpc2n    Started container daprd
+26m         Normal    Pulled                   pod/drasi-mongo-0                               Container image "ghcr.io/drasi-project/mongo:6" already present on machine
+26m         Normal    Created                  pod/drasi-resource-provider-587fbbb564-cpc2n    Created container: daprd
+26m         Normal    Created                  pod/drasi-mongo-0                               Created container: mongo
+26m         Normal    Pulled                   pod/drasi-api-6cbd7ccbd5-r9g6h                  Successfully pulled image "ghcr.io/drasi-project/api:0.10.0" in 761ms (761ms including waiting). Image size: 19666209 bytes.
+26m         Normal    Pulled                   pod/drasi-resource-provider-587fbbb564-cpc2n    Container image "daprio/daprd:1.14.5" already present on machine
+26m         Normal    Pulled                   pod/drasi-resource-provider-587fbbb564-cpc2n    Successfully pulled image "ghcr.io/drasi-project/kubernetes-provider:0.10.0" in 763ms (763ms including waiting). Image size: 16090037 bytes.
+26m         Normal    Started                  pod/drasi-mongo-0                               Started container mongo
+26m         Normal    SuccessfulDelete         statefulset/drasi-mongo                         delete Pod drasi-mongo-0 in StatefulSet drasi-mongo successful
+26m         Normal    ScalingReplicaSet        deployment/drasi-api                            Scaled down replica set drasi-api-6cbd7ccbd5 from 1 to 0
+26m         Normal    SuccessfulDelete         replicaset/drasi-api-6cbd7ccbd5                 Deleted pod: drasi-api-6cbd7ccbd5-r9g6h
+26m         Normal    Killing                  pod/drasi-resource-provider-587fbbb564-cpc2n    Stopping container kubernetes-provider
+26m         Normal    Killing                  pod/drasi-mongo-0                               Stopping container mongo
+26m         Normal    Killing                  pod/drasi-api-6cbd7ccbd5-r9g6h                  Stopping container drasi-api
+26m         Normal    Killing                  pod/drasi-api-6cbd7ccbd5-r9g6h                  Stopping container daprd
+26m         Normal    Killing                  pod/drasi-resource-provider-587fbbb564-cpc2n    Stopping container daprd
+26m         Normal    SuccessfulCreate         statefulset/drasi-mongo                         create Pod drasi-mongo-0 in StatefulSet drasi-mongo successful
+26m         Normal    Scheduled                pod/drasi-mongo-0                               Successfully assigned drasi-system/drasi-mongo-0 to aks-system-12296413-vmss000000
+25m         Normal    Started                  pod/drasi-redis-0                               Started container redis
+25m         Normal    Pulled                   pod/drasi-redis-0                               Container image "ghcr.io/drasi-project/redis:7-alpine" already present on machine
+25m         Normal    Created                  pod/drasi-redis-0                               Created container: redis
+25m         Normal    SuccessfulDelete         statefulset/drasi-redis                         delete Pod drasi-redis-0 in StatefulSet drasi-redis successful
+25m         Normal    Killing                  pod/drasi-redis-0                               Stopping container redis
+25m         Normal    SuccessfulCreate         statefulset/drasi-redis                         create Pod drasi-redis-0 in StatefulSet drasi-redis successful
+25m         Normal    Scheduled                pod/drasi-redis-0                               Successfully assigned drasi-system/drasi-redis-0 to aks-system-12296413-vmss000001
+25m         Normal    Pulled                   pod/drasi-mongo-0                               Container image "ghcr.io/drasi-project/mongo:6" already present on machine
+25m         Normal    Started                  pod/drasi-mongo-0                               Started container mongo
+25m         Normal    Created                  pod/drasi-mongo-0                               Created container: mongo
+25m         Normal    Pulled                   pod/drasi-redis-0                               Container image "ghcr.io/drasi-project/redis:7-alpine" already present on machine
+25m         Normal    Created                  pod/drasi-redis-0                               Created container: redis
+25m         Normal    Started                  pod/drasi-redis-0                               Started container redis
+22m         Warning   Failed                   pod/default-publish-api-7997dbd966-xsg95        Error: ImagePullBackOff
+22m         Normal    BackOff                  pod/default-publish-api-7997dbd966-xsg95        Back-off pulling image "drasi-project/query-container-publish-api:latest"
+20m         Normal    SuccessfulCreate         replicaset/default-publish-api-bbf795587        Created pod: default-publish-api-bbf795587-pr9wb
+20m         Normal    SuccessfulDelete         replicaset/default-publish-api-7997dbd966       Deleted pod: default-publish-api-7997dbd966-xsg95
+20m         Normal    ScalingReplicaSet        deployment/default-publish-api                  Scaled down replica set default-publish-api-7997dbd966 from 1 to 0
+20m         Normal    Scheduled                pod/default-publish-api-bbf795587-pr9wb         Successfully assigned drasi-system/default-publish-api-bbf795587-pr9wb to aks-system-12296413-vmss000000
+19m         Normal    Pulling                  pod/default-publish-api-bbf795587-pr9wb         Pulling image "drasi-project/query-container-publish-api:latest"
+19m         Normal    Started                  pod/default-publish-api-bbf795587-pr9wb         Started container daprd
+19m         Normal    Created                  pod/default-publish-api-bbf795587-pr9wb         Created container: daprd
+19m         Normal    Pulled                   pod/default-publish-api-bbf795587-pr9wb         Container image "daprio/daprd:1.9.0" already present on machine
+19m         Warning   Failed                   pod/default-publish-api-bbf795587-pr9wb         Error: ErrImagePull
+19m         Warning   Failed                   pod/default-publish-api-bbf795587-pr9wb         Failed to pull image "drasi-project/query-container-publish-api:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-publish-api:latest": failed to resolve reference "docker.io/drasi-project/query-container-publish-api:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+19m         Warning   BackOff                  pod/default-publish-api-bbf795587-pr9wb         Back-off restarting failed container daprd in pod default-publish-api-bbf795587-pr9wb_drasi-system(bce4c290-4a34-498e-9c45-7c0e7ffc71fb)
+17m         Warning   Failed                   pod/default-query-host-6648c44f9-cqnmv          Error: ImagePullBackOff
+17m         Normal    BackOff                  pod/default-query-host-6648c44f9-cqnmv          Back-off pulling image "drasi-project/query-container-query-host:latest"
+17m         Normal    BackOff                  pod/default-view-svc-59cc5cf78b-c64fq           Back-off pulling image "drasi-project/query-container-view-svc:latest"
+17m         Warning   Failed                   pod/default-view-svc-59cc5cf78b-c64fq           Error: ImagePullBackOff
+16m         Normal    Scheduled                pod/default-query-host-86545969c-b882s          Successfully assigned drasi-system/default-query-host-86545969c-b882s to aks-system-12296413-vmss000001
+16m         Normal    SuccessfulCreate         replicaset/default-query-host-86545969c         Created pod: default-query-host-86545969c-b882s
+16m         Normal    ScalingReplicaSet        deployment/default-query-host                   Scaled down replica set default-query-host-6648c44f9 from 1 to 0
+16m         Normal    SuccessfulDelete         replicaset/default-query-host-6648c44f9         Deleted pod: default-query-host-6648c44f9-cqnmv
+15m         Normal    Pulling                  pod/default-query-host-86545969c-b882s          Pulling image "drasi-project/query-container-query-host:latest"
+15m         Warning   Failed                   pod/default-query-host-86545969c-b882s          Failed to pull image "drasi-project/query-container-query-host:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-query-host:latest": failed to resolve reference "docker.io/drasi-project/query-container-query-host:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+15m         Warning   Failed                   pod/default-query-host-86545969c-b882s          Error: ErrImagePull
+15m         Normal    Pulled                   pod/default-query-host-86545969c-b882s          Container image "daprio/daprd:1.9.0" already present on machine
+15m         Normal    Started                  pod/default-query-host-86545969c-b882s          Started container daprd
+15m         Normal    Created                  pod/default-query-host-86545969c-b882s          Created container: daprd
+15m         Warning   BackOff                  pod/default-query-host-86545969c-b882s          Back-off restarting failed container daprd in pod default-query-host-86545969c-b882s_drasi-system(27b3c9fd-3ebe-4eae-b39c-2a27cad501e3)
+12m         Normal    SuccessfulDelete         replicaset/default-view-svc-59cc5cf78b          Deleted pod: default-view-svc-59cc5cf78b-c64fq
+12m         Normal    ScalingReplicaSet        deployment/default-view-svc                     Scaled down replica set default-view-svc-59cc5cf78b from 1 to 0
+12m         Normal    SuccessfulCreate         replicaset/default-view-svc-6769fdccc7          Created pod: default-view-svc-6769fdccc7-kqqgb
+12m         Normal    Scheduled                pod/default-view-svc-6769fdccc7-kqqgb           Successfully assigned drasi-system/default-view-svc-6769fdccc7-kqqgb to aks-system-12296413-vmss000001
+12m         Normal    BackOff                  pod/default-publish-api-54d488cf5f-2smnr        Back-off pulling image "drasi-project/query-container-publish-api:latest"
+12m         Warning   Failed                   pod/default-publish-api-54d488cf5f-2smnr        Error: ImagePullBackOff
+12m         Warning   Failed                   pod/default-view-svc-8698f5ff6c-z9jxh           Error: ImagePullBackOff
+12m         Normal    BackOff                  pod/default-view-svc-8698f5ff6c-z9jxh           Back-off pulling image "drasi-project/query-container-view-svc:latest"
+12m         Normal    BackOff                  pod/default-query-host-5c9b69855d-rhc7c         Back-off pulling image "drasi-project/query-container-query-host:latest"
+12m         Warning   Failed                   pod/default-query-host-5c9b69855d-rhc7c         Error: ImagePullBackOff
+11m         Normal    Pulling                  pod/default-view-svc-6769fdccc7-kqqgb           Pulling image "drasi-project/query-container-view-svc:latest"
+11m         Normal    Started                  pod/default-view-svc-6769fdccc7-kqqgb           Started container daprd
+11m         Warning   Failed                   pod/default-view-svc-6769fdccc7-kqqgb           Failed to pull image "drasi-project/query-container-view-svc:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-view-svc:latest": failed to resolve reference "docker.io/drasi-project/query-container-view-svc:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+11m         Warning   Failed                   pod/default-view-svc-6769fdccc7-kqqgb           Error: ErrImagePull
+11m         Normal    Created                  pod/default-view-svc-6769fdccc7-kqqgb           Created container: daprd
+11m         Normal    Pulled                   pod/default-view-svc-6769fdccc7-kqqgb           Container image "daprio/daprd:1.9.0" already present on machine
+11m         Warning   Failed                   pod/default-view-svc-6769fdccc7-kqqgb           Error: ImagePullBackOff
+11m         Normal    BackOff                  pod/default-view-svc-6769fdccc7-kqqgb           Back-off pulling image "drasi-project/query-container-view-svc:latest"
+11m         Warning   BackOff                  pod/default-view-svc-6769fdccc7-kqqgb           Back-off restarting failed container daprd in pod default-view-svc-6769fdccc7-kqqgb_drasi-system(75d02fa2-cbc0-4e77-a449-1068f70b6c5d)
+11m         Warning   FailedCreate             replicaset/drasi-view-service-8565f488f8        Error creating: pods "drasi-view-service-8565f488f8-" is forbidden: error looking up service account drasi-system/drasi-sa: serviceaccount "drasi-sa" not found
+11m         Warning   Failed                   pod/default-query-host-86545969c-b882s          Error: ImagePullBackOff
+11m         Normal    BackOff                  pod/default-query-host-86545969c-b882s          Back-off pulling image "drasi-project/query-container-query-host:latest"
+10m         Normal    BackOff                  pod/default-publish-api-bbf795587-pr9wb         Back-off pulling image "drasi-project/query-container-publish-api:latest"
+10m         Warning   Failed                   pod/default-publish-api-bbf795587-pr9wb         Error: ImagePullBackOff
+8m38s       Normal    ScalingReplicaSet        deployment/default-publish-api                  Scaled down replica set default-publish-api-bbf795587 from 1 to 0
+8m38s       Normal    ScalingReplicaSet        deployment/default-publish-api                  Scaled down replica set default-publish-api-54d488cf5f from 1 to 0
+8m38s       Normal    SuccessfulDelete         replicaset/default-publish-api-54d488cf5f       Deleted pod: default-publish-api-54d488cf5f-2smnr
+8m38s       Normal    SuccessfulDelete         replicaset/default-publish-api-bbf795587        Deleted pod: default-publish-api-bbf795587-pr9wb
+8m37s       Normal    ScalingReplicaSet        deployment/default-query-host                   Scaled down replica set default-query-host-5c9b69855d from 1 to 0
+8m37s       Normal    SuccessfulDelete         replicaset/default-query-host-86545969c         Deleted pod: default-query-host-86545969c-b882s
+8m37s       Normal    SuccessfulDelete         replicaset/default-view-svc-8698f5ff6c          Deleted pod: default-view-svc-8698f5ff6c-z9jxh
+8m37s       Normal    ScalingReplicaSet        deployment/default-view-svc                     Scaled down replica set default-view-svc-6769fdccc7 from 1 to 0
+8m37s       Normal    ScalingReplicaSet        deployment/default-query-host                   Scaled down replica set default-query-host-86545969c from 1 to 0
+8m37s       Normal    SuccessfulDelete         replicaset/default-query-host-5c9b69855d        Deleted pod: default-query-host-5c9b69855d-rhc7c
+8m37s       Normal    SuccessfulDelete         replicaset/default-view-svc-6769fdccc7          Deleted pod: default-view-svc-6769fdccc7-kqqgb
+8m37s       Normal    ScalingReplicaSet        deployment/default-view-svc                     Scaled down replica set default-view-svc-8698f5ff6c from 1 to 0
+8m27s       Normal    ScalingReplicaSet        deployment/default-publish-api                  Scaled up replica set default-publish-api-bbf795587 from 0 to 1
+8m27s       Normal    SuccessfulCreate         replicaset/default-publish-api-bbf795587        Created pod: default-publish-api-bbf795587-76pz6
+8m27s       Normal    Scheduled                pod/default-publish-api-bbf795587-76pz6         Successfully assigned drasi-system/default-publish-api-bbf795587-76pz6 to aks-system-12296413-vmss000001
+7m35s       Normal    Pulling                  pod/default-publish-api-bbf795587-76pz6         Pulling image "drasi-project/query-container-publish-api:latest"
+7m33s       Warning   Failed                   pod/default-publish-api-bbf795587-76pz6         Error: ErrImagePull
+7m33s       Normal    Started                  pod/default-publish-api-bbf795587-76pz6         Started container daprd
+7m33s       Normal    Pulled                   pod/default-publish-api-bbf795587-76pz6         Container image "daprio/daprd:1.9.0" already present on machine
+7m33s       Warning   Failed                   pod/default-publish-api-bbf795587-76pz6         Failed to pull image "drasi-project/query-container-publish-api:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-publish-api:latest": failed to resolve reference "docker.io/drasi-project/query-container-publish-api:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+7m33s       Normal    Created                  pod/default-publish-api-bbf795587-76pz6         Created container: daprd
+7m32s       Warning   BackOff                  pod/default-publish-api-bbf795587-76pz6         Back-off restarting failed container daprd in pod default-publish-api-bbf795587-76pz6_drasi-system(a35a7d46-ef22-410b-b4ca-1b490dc1a309)
+4m25s       Normal    ScalingReplicaSet        deployment/default-query-host                   Scaled up replica set default-query-host-86545969c from 0 to 1
+4m25s       Normal    SuccessfulCreate         replicaset/default-query-host-86545969c         Created pod: default-query-host-86545969c-rq7xm
+4m25s       Normal    Scheduled                pod/default-query-host-86545969c-rq7xm          Successfully assigned drasi-system/default-query-host-86545969c-rq7xm to aks-system-12296413-vmss000001
+3m33s       Normal    Pulling                  pod/default-query-host-86545969c-rq7xm          Pulling image "drasi-project/query-container-query-host:latest"
+3m31s       Warning   Failed                   pod/default-query-host-86545969c-rq7xm          Error: ErrImagePull
+3m31s       Normal    Started                  pod/default-query-host-86545969c-rq7xm          Started container daprd
+3m31s       Normal    Created                  pod/default-query-host-86545969c-rq7xm          Created container: daprd
+3m31s       Normal    Pulled                   pod/default-query-host-86545969c-rq7xm          Container image "daprio/daprd:1.9.0" already present on machine
+3m31s       Warning   Failed                   pod/default-query-host-86545969c-rq7xm          Failed to pull image "drasi-project/query-container-query-host:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-query-host:latest": failed to resolve reference "docker.io/drasi-project/query-container-query-host:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+3m19s       Normal    BackOff                  pod/default-query-host-86545969c-rq7xm          Back-off pulling image "drasi-project/query-container-query-host:latest"
+3m19s       Warning   Failed                   pod/default-query-host-86545969c-rq7xm          Error: ImagePullBackOff
+3m19s       Warning   BackOff                  pod/default-query-host-86545969c-rq7xm          Back-off restarting failed container daprd in pod default-query-host-86545969c-rq7xm_drasi-system(78908488-24a7-4c04-a8d5-26faf9ea5cd6)
+3m15s       Normal    BackOff                  pod/default-publish-api-bbf795587-76pz6         Back-off pulling image "drasi-project/query-container-publish-api:latest"
+3m15s       Warning   Failed                   pod/default-publish-api-bbf795587-76pz6         Error: ImagePullBackOff
+22s         Normal    SuccessfulCreate         replicaset/default-view-svc-6769fdccc7          Created pod: default-view-svc-6769fdccc7-9xwc2
+22s         Normal    ScalingReplicaSet        deployment/default-view-svc                     Scaled up replica set default-view-svc-6769fdccc7 from 0 to 1
+22s         Normal    Scheduled                pod/default-view-svc-6769fdccc7-9xwc2           Successfully assigned drasi-system/default-view-svc-6769fdccc7-9xwc2 to aks-system-12296413-vmss000000
+4s          Normal    Pulling                  pod/default-view-svc-6769fdccc7-9xwc2           Pulling image "drasi-project/query-container-view-svc:latest"
+2s          Normal    BackOff                  pod/default-view-svc-6769fdccc7-9xwc2           Back-off pulling image "drasi-project/query-container-view-svc:latest"
+2s          Warning   Failed                   pod/default-view-svc-6769fdccc7-9xwc2           Error: ErrImagePull
+2s          Warning   Failed                   pod/default-view-svc-6769fdccc7-9xwc2           Failed to pull image "drasi-project/query-container-view-svc:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-view-svc:latest": failed to resolve reference "docker.io/drasi-project/query-container-view-svc:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+2s          Normal    Created                  pod/default-view-svc-6769fdccc7-9xwc2           Created container: daprd
+2s          Normal    Started                  pod/default-view-svc-6769fdccc7-9xwc2           Started container daprd
+2s          Normal    Pulled                   pod/default-view-svc-6769fdccc7-9xwc2           Container image "daprio/daprd:1.9.0" already present on machine
+2s          Warning   BackOff                  pod/default-view-svc-6769fdccc7-9xwc2           Back-off restarting failed container daprd in pod default-view-svc-6769fdccc7-9xwc2_drasi-system(e85fa30a-0d95-4831-b6c0-a5e7abe5b13a)
+2s          Warning   Failed                   pod/default-view-svc-6769fdccc7-9xwc2           Error: ImagePullBackOff
+

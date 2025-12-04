@@ -1,0 +1,10 @@
+NAME                                             CREATED AT
+components.dapr.io                               2025-11-30T17:21:35Z
+configurations.dapr.io                           2025-11-30T17:21:35Z
+httpendpoints.dapr.io                            2025-11-30T17:21:35Z
+resiliencies.dapr.io                             2025-11-30T17:21:35Z
+subscriptions.dapr.io                            2025-11-30T17:21:35Z
+volumesnapshotclasses.snapshot.storage.k8s.io    2025-11-30T17:17:22Z
+volumesnapshotcontents.snapshot.storage.k8s.io   2025-11-30T17:17:22Z
+volumesnapshots.snapshot.storage.k8s.io          2025-11-30T17:17:22Z
+

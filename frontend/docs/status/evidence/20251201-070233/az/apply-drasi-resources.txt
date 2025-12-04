@@ -1,0 +1,24 @@
+[Drasi] Postdeploy starting (CLI-driven install)
+providers.yaml generated with registry 'ghcr.io/drasi-project'.
+Dapr CRDs detected.
+Applying manifests at D:\GitHub\drasicrhsit\drasi\..\drasi-manifests\kubernetes-resources.yaml
+Applying manifests at D:\GitHub\drasicrhsit\drasi\manifests
+Warning: resource secrets/cosmos-statestore is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+Drasi CLI environment set to current kube context (drasi-system).
+Applying Drasi resources via CLI: D:\GitHub\drasicrhsit\drasi\..\drasi-manifests\drasi-resources.yaml
+Drasi resources applied. See D:\GitHub\drasicrhsit\drasi\..\docs\status\evidence\20251201-070233\logs\drasi-apply-resources.log for details.
+
+?? Capturing Drasi service endpoints...
+Waiting for default-view-svc-public LoadBalancer external IP...
+? Found view service external IP: 4.200.107.168
+Setting DRASI_VIEW_SERVICE_URL=http://4.200.107.168
+??  No SignalR gateway LoadBalancer found (optional)
+
+?? Updating Container App with Drasi URLs...
+Updating drasicrhsith-qab-api with Drasi environment variables...
+? Container App updated successfully
+[33;1mWARNING: Placeholder values detected in cosmos-statestore; recreating for MI path.[0m
+Cosmos secret ensured (endpoint only for MI): https://drasicrhsith-qab-cosmos.documents.azure.com:443/
+Using Managed Identity for Cosmos; skipping key-based secret creation.
+[Drasi] Postdeploy complete.
+

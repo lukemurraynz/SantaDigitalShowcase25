@@ -1,0 +1,26 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: cosmos-state
+  namespace: drasi-system
+# Scope to only reaction pods - DO NOT load in drasi-api or drasi-resource-provider
+scopes:
+  - wishlist-sync-cosmos-reaction
+spec:
+  type: state.azure.cosmosdb
+  version: v1
+  metadata:
+    - name: url
+      secretKeyRef:
+        name: cosmos-statestore
+        key: endpoint
+    - name: masterKey
+      secretKeyRef:
+        name: cosmos-statestore
+        key: key
+    - name: database
+      value: elves_demo
+    - name: collection
+      value: wishlists
+    - name: keyPrefix
+      value: none

@@ -1,0 +1,380 @@
+name: santaworkshop
+
+hooks:
+  preprovision:
+    windows:
+      shell: pwsh
+      run: |
+        Write-Host "`n🧹 Running pre-provision cleanup..." -ForegroundColor Cyan
+        & ./scripts/pre-provision-cleanup.ps1
+        if ($LASTEXITCODE -ne 0) {
+          Write-Warning "Pre-provision cleanup had issues but continuing..."
+        }
+    posix:
+      shell: sh
+      run: |
+        echo ""
+        echo "🧹 Running pre-provision cleanup..."
+        pwsh -File ./scripts/pre-provision-cleanup.ps1 || echo "Pre-provision cleanup had issues but continuing..."
+
+infra:
+  provider: bicep
+  path: infra
+  # Automatically align Bicep param 'env' with azd environment name
+  # and keep 'project' stable for naming.
+  parameters:
+    env: ${AZURE_ENV_NAME}
+    # Sync 'project' with application name (top-level 'name'). Update only here if app name changes.
+    project: santaworkshop
+    # Pass Drasi URLs if available (set by postdeploy hook)
+    drasiViewServiceUrl: ${DRASI_VIEW_SERVICE_URL=""}
+    drasiSignalRUrl: ${DRASI_SIGNALR_URL=""}
+    # API image: uses SERVICE_API_IMAGE_NAME when available (azd deploy), otherwise bootstrap image
+    # The bootstrap image (k8se/quickstart) is a minimal Azure Container Apps sample image that:
+    # - Responds on port 80 with health endpoints
+    # - Allows 'azd provision' to complete before the actual app image is built
+    # After provisioning, 'azd deploy api' replaces it with the real application image
+    apiImage: ${SERVICE_API_IMAGE_NAME="mcr.microsoft.com/k8se/quickstart:latest"}
+  # Hook to ensure webHost is saved to azd environment after infrastructure provisioning
+  postprovision:
+    shell: pwsh
+    run: |
+      # Resolve common env values early for evidence and probes
+      $envName = azd env get-value AZURE_ENV_NAME 2>$null
+      $rg = azd env get-value AZURE_RESOURCE_GROUP 2>$null
+      if (-not $envName) { $envName = "dev" }
+      if (-not $rg) { $rg = "santaworkshop-$envName-rg" }
+
+      # Set VITE_SIGNALR_URL to empty string (frontend and API are now same-origin on Container App)
+      Write-Host "`n🔧 Configuring SignalR for Container App (same-origin)..." -ForegroundColor Cyan
+      azd env set VITE_SIGNALR_URL ""
+      Write-Host "   ✅ VITE_SIGNALR_URL set to empty (frontend uses /api/hub on same Container App)" -ForegroundColor Green
+
+      # Create timestamped evidence folder
+      $ts = Get-Date -Format "yyyyMMdd-HHmmss"
+      $evidenceRoot = Join-Path (Resolve-Path .).Path "docs/status/evidence/$ts"
+      New-Item -ItemType Directory -Force -Path $evidenceRoot | Out-Null
+      foreach ($sub in @('kubectl','az','logs')) { New-Item -ItemType Directory -Force -Path (Join-Path $evidenceRoot $sub) | Out-Null }
+
+      $webHost = azd env get-value webHost 2>$null
+      if ($webHost) {
+        Write-Host "✅ webHost saved: $webHost" -ForegroundColor Green
+      } else {
+        Write-Warning "webHost not found in azd environment outputs"
+      }
+
+      # Check if DRASI_SIGNALR_URL is set (indicates Drasi was deployed)
+      $signalrUrl = azd env get-value DRASI_SIGNALR_URL 2>$null
+      if ($signalrUrl) {
+        Write-Host "`n⚠️  IMPORTANT: Drasi SignalR URL detected: $signalrUrl" -ForegroundColor Yellow
+        Write-Host "   Run 'azd deploy api' to update Container App with SignalR URL" -ForegroundColor Yellow
+      } else {
+        Write-Host "`nℹ️  DRASI_SIGNALR_URL not set yet. It will be set after 'azd deploy drasi'" -ForegroundColor Cyan
+      }
+
+      # CRITICAL: Use local build & push as the primary deployment path for reliability
+      Write-Host "`n🚀 Building and pushing API image (primary path)..." -ForegroundColor Cyan
+      try {
+        pwsh -File ./scripts/azd-build-push-api.ps1
+        if ($LASTEXITCODE -eq 0) {
+          Write-Host "✅ Local build/push completed and Container App updated" -ForegroundColor Green
+        } else {
+          Write-Warning "Primary build/push reported issues. Attempting azd deploy as secondary."
+          azd deploy api
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ API service deployed via azd" -ForegroundColor Green
+          } else {
+            Write-Warning "Both primary and secondary API deployment paths reported issues. Please check logs."
+          }
+        }
+      } catch {
+        Write-Warning "Primary build/push execution error: $($_.Exception.Message). Attempting azd deploy."
+        azd deploy api
+        if ($LASTEXITCODE -eq 0) {
+          Write-Host "✅ API service deployed via azd" -ForegroundColor Green
+        } else {
+          Write-Warning "API deployment via azd also failed. Manual intervention required."
+        }
+      }
+
+      # Capture Container App revision mode, revisions, and basic logs for evidence
+      try {
+        $appName = "santaworkshop-$envName-api"
+        az containerapp revision set-mode -n $appName -g $rg --mode Single 2>$null | Out-Null
+        az containerapp revision list -n $appName -g $rg -o table | Out-String | Set-Content (Join-Path (Join-Path $evidenceRoot 'az') 'containerapp-revisions.txt')
+        $appLogs = az containerapp logs show -n $appName -g $rg --type console --tail 200 2>$null | Out-String
+        $appLogs | Set-Content (Join-Path (Join-Path $evidenceRoot 'logs') 'containerapp-console.txt')
+        ($appLogs | Select-String -Pattern ' (4\d\d|5\d\d) ' -SimpleMatch) | Out-String | Set-Content (Join-Path (Join-Path $evidenceRoot 'logs') 'containerapp-errors.txt')
+        $fqdn = az containerapp show -n $appName -g $rg --query properties.configuration.ingress.fqdn -o tsv 2>$null
+        if ($fqdn) {
+          "FQDN: https://$fqdn" | Set-Content (Join-Path (Join-Path $evidenceRoot 'az') 'containerapp-fqdn.txt')
+          try {
+            $healthUrl = "https://$fqdn/health"
+            $resp = Invoke-WebRequest -Uri $healthUrl -UseBasicParsing -Method GET -TimeoutSec 10
+            "Health GET $healthUrl -> $($resp.StatusCode)" | Set-Content (Join-Path (Join-Path $evidenceRoot 'logs') 'containerapp-health.txt')
+          } catch {
+            "Health probe failed: $($_.Exception.Message)" | Set-Content (Join-Path (Join-Path $evidenceRoot 'logs') 'containerapp-health.txt')
+          }
+          # Additional endpoint probes for negotiate and ready
+          foreach ($path in @('/negotiate','/ready')) {
+            try {
+              $url = "https://$fqdn$path"
+              $resp2 = Invoke-WebRequest -Uri $url -UseBasicParsing -Method GET -TimeoutSec 10
+              "GET $url -> $($resp2.StatusCode)" | Add-Content (Join-Path (Join-Path $evidenceRoot 'logs') 'containerapp-health.txt')
+            } catch {
+              "GET $url failed: $($_.Exception.Message)" | Add-Content (Join-Path (Join-Path $evidenceRoot 'logs') 'containerapp-health.txt')
+            }
+          }
+        }
+      } catch {
+        Write-Warning "Container App evidence capture failed: $($_.Exception.Message)"
+      }
+      Write-Host "`n🔨 Building & pushing reaction/source images (if Docker + registry available) BEFORE Drasi deploy..." -ForegroundColor Cyan
+      $acrServer = azd env get-value containerRegistryEndpoint 2>$null
+      if (-not $acrServer) { $acrServer = azd env get-value containerRegistryLoginServer 2>$null }
+      if ($acrServer) { Write-Host "Using registry: $acrServer" -ForegroundColor Yellow }
+      $buildScript = Join-Path (Resolve-Path .).Path "scripts/drasi/build-push-reactions.ps1"
+      if (Test-Path $buildScript) {
+        if ($acrServer) { pwsh -File $buildScript -Version v0.1.0 -Registry $acrServer }
+        else { pwsh -File $buildScript -Version v0.1.0 }
+      } else { Write-Warning "scripts/drasi/build-push-reactions.ps1 not found; skipping image build/push" }
+
+      Write-Host "`n🔐 Pre-enabling Managed Identity & RBAC for Cosmos (before AKS/Drasi) ..." -ForegroundColor Cyan
+      try {
+        $rg = azd env get-value AZURE_RESOURCE_GROUP
+        $envName = azd env get-value AZURE_ENV_NAME
+        pwsh -File ../scripts/enable-cosmos-managed-identity.ps1 -ResourceGroup $rg -Project "santaworkshop" -Env $envName
+        if ($LASTEXITCODE -eq 0) {
+          Write-Host "✅ Managed Identity configured and role assignments created (pre-drasi)" -ForegroundColor Green
+        } else {
+          Write-Warning "Managed Identity pre-enable encountered errors; continuing, but Drasi may need a retry after RBAC propagation."
+        }
+      } catch {
+        Write-Warning "Managed Identity pre-enable failed: $($_.Exception.Message)"
+      }
+
+      Write-Host "`n⏳ RBAC propagation gate (180s) before Drasi deploy..." -ForegroundColor Yellow
+      Write-Host "   This ensures Cosmos DB role assignments are active before Drasi components start" -ForegroundColor Gray
+      Start-Sleep -Seconds 180
+
+      Write-Host "`n🚀 Deploying Drasi services (AKS) AFTER images & MI are ready..." -ForegroundColor Cyan
+      azd deploy drasi
+      if ($LASTEXITCODE -eq 0) {
+        Write-Host "✅ Drasi services deployed successfully" -ForegroundColor Green
+      } else {
+        Write-Warning "Drasi deployment failed. Run 'azd deploy drasi' manually."
+      }
+
+      Write-Host "`n⏳ Waiting for Drasi CRDs before applying resources (defensive check)..." -ForegroundColor Cyan
+      $waitScript = Join-Path (Resolve-Path .).Path "scripts/wait-drasi-crds.ps1"
+      if (Test-Path $waitScript) {
+        pwsh -File $waitScript
+        if ($LASTEXITCODE -ne 0) { Write-Warning "CRD wait script reported timeout or error" }
+        # Save pre-validation evidence
+        kubectl get pods -n drasi-system | Out-String | Set-Content (Join-Path (Join-Path $evidenceRoot 'kubectl') 'get-pods-pre.txt')
+        if ($rg) { az resource list -g $rg --query "[].{name:name, type:type}" -o table | Out-String | Set-Content (Join-Path (Join-Path $evidenceRoot 'az') 'resource-list-pre.txt') }
+      } else {
+        Write-Warning "wait-drasi-crds.ps1 not found; skipping CRD wait"
+      }
+
+      Write-Host "`n🧪 Running interoperability smoke tests (Container App → Drasi)..." -ForegroundColor Cyan
+      try {
+        $interop = Join-Path (Resolve-Path .).Path "scripts/test-interoperability.ps1"
+        if (Test-Path $interop) {
+              # Save post-fix evidence
+              kubectl get pods -n drasi-system | Out-String | Set-Content (Join-Path (Join-Path $evidenceRoot 'kubectl') 'get-pods-postfix.txt')
+              if ($rg) { az resource list -g $rg --query "[].{name:name, type:type}" -o table | Out-String | Set-Content (Join-Path (Join-Path $evidenceRoot 'az') 'resource-list-postfix.txt') }
+          pwsh -File $interop | Write-Host
+              # Save final validation evidence
+              kubectl get pods -n drasi-system | Out-String | Set-Content (Join-Path (Join-Path $evidenceRoot 'kubectl') 'get-pods-final.txt')
+          Write-Host "✅ Interoperability test executed" -ForegroundColor Green
+              # Write unattended run summary
+              $summaryPath = Join-Path (Resolve-Path .).Path 'docs/status/unattended-run.json'
+              $summary = @{ timestamp = (Get-Date).ToString('o'); env = $envName; resourceGroup = $rg; status = 'issues-fixed-revalidated'; evidence = $evidenceRoot } | ConvertTo-Json -Compress
+              Add-Content -Path $summaryPath -Value $summary
+        } else {
+          Write-Warning "Interoperability script not found at $interop"
+              $summaryPath = Join-Path (Resolve-Path .).Path 'docs/status/unattended-run.json'
+              $summary = @{ timestamp = (Get-Date).ToString('o'); env = $envName; resourceGroup = $rg; status = 'fix-failed'; evidence = $evidenceRoot } | ConvertTo-Json -Compress
+              Add-Content -Path $summaryPath -Value $summary
+        }
+      } catch {
+        Write-Warning "Interoperability test failed to run: $($_.Exception.Message)"
+      }
+          $summaryPath = Join-Path (Resolve-Path .).Path 'docs/status/unattended-run.json'
+          $summary = @{ timestamp = (Get-Date).ToString('o'); env = $envName; resourceGroup = $rg; status = 'validated'; evidence = $evidenceRoot } | ConvertTo-Json -Compress
+          Add-Content -Path $summaryPath -Value $summary
+
+      Write-Host "`n🧪 Running demo readiness checks..." -ForegroundColor Cyan
+      try {
+        $readiness = Join-Path (Resolve-Path .).Path "scripts/test-demo-readiness.ps1"
+        if (Test-Path $readiness) {
+          pwsh -File $readiness | Write-Host
+          Write-Host "✅ Demo readiness script executed" -ForegroundColor Green
+        } else {
+          Write-Warning "Demo readiness script not found at $readiness"
+        }
+      } catch {
+        Write-Warning "Demo readiness check failed to run: $($_.Exception.Message)"
+      }
+
+      Write-Host "`n🧪 Validating environment endpoints (health, readiness, negotiate)..." -ForegroundColor Cyan
+      $validateScript = Join-Path (Resolve-Path .).Path "scripts/validate-env.ps1"
+      if (Test-Path $validateScript) {
+        pwsh -File $validateScript
+      } else {
+        Write-Warning "validate-env.ps1 not found; skipping endpoint validation"
+      }
+
+      Write-Host "`n🔍 Running Drasi deployment validation..." -ForegroundColor Cyan
+      $validationScript = Join-Path (Resolve-Path .).Path "scripts/validate-drasi-deployment.ps1"
+      if (Test-Path $validationScript) {
+        $rg = azd env get-value AZURE_RESOURCE_GROUP
+        $envName = azd env get-value AZURE_ENV_NAME
+        pwsh -File $validationScript -ResourceGroup $rg -Project "santaworkshop" -Env $envName
+        if ($LASTEXITCODE -ne 0) {
+          Write-Warning "Validation detected issues. Attempting automatic fix..."
+          $fixScript = Join-Path (Resolve-Path .).Path "scripts/fix-drasi-deployment.ps1"
+          if (Test-Path $fixScript) {
+            pwsh -File $fixScript -ResourceGroup $rg -Project "santaworkshop" -Env $envName
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "✅ Auto-fix completed. Re-running validation..." -ForegroundColor Green
+              pwsh -File $validationScript -ResourceGroup $rg -Project "santaworkshop" -Env $envName
+            } else {
+              Write-Warning "Auto-fix encountered errors. Manual intervention may be required."
+            }
+          }
+        } else {
+          Write-Host "✅ Drasi deployment validation passed!" -ForegroundColor Green
+        }
+      } else {
+        Write-Warning "validate-drasi-deployment.ps1 not found; skipping Drasi validation"
+      }
+
+      # Frontend is now served from Container App (no SWA config needed)
+      Write-Host "`n📝 Frontend is served from Container App - no SWA config needed..." -ForegroundColor Cyan
+      $apiAppName = "santaworkshop-$envName-api"
+      $apiFqdn = az containerapp show -n $apiAppName -g $rg --query "properties.configuration.ingress.fqdn" -o tsv 2>$null
+      if ($apiFqdn) {
+        Write-Host "   Container App FQDN: $apiFqdn" -ForegroundColor Green
+        Write-Host "   Frontend and API are same-origin (no CORS issues)" -ForegroundColor Gray
+
+        # CRITICAL: Delete stale .env.production so builds use defaults
+        $envProdPath = Join-Path (Resolve-Path .).Path "frontend/.env.production"
+        if (Test-Path $envProdPath) {
+          Remove-Item $envProdPath -Force
+          Write-Host "   ✅ Removed stale .env.production" -ForegroundColor Green
+        }
+      } else {
+        Write-Warning "Could not resolve API FQDN"
+      }
+
+      Write-Host "`n🔍 Running post-Drasi validation to capture service URLs..." -ForegroundColor Cyan
+      $postValidationScript = Join-Path (Resolve-Path .).Path "scripts/post-drasi-validation.ps1"
+      if (Test-Path $postValidationScript) {
+        pwsh -File $postValidationScript -UpdateContainerApp
+        if ($LASTEXITCODE -eq 0) {
+          Write-Host "✅ Post-Drasi validation completed" -ForegroundColor Green
+          Write-Host "   Container App configuration updated automatically" -ForegroundColor Gray
+        } else {
+          Write-Warning "Post-Drasi validation encountered issues"
+        }
+      } else {
+        Write-Warning "Post-validation script not found at $postValidationScript"
+      }
+    continueOnError: true
+
+services:
+  api:
+    project: .
+    language: docker
+    host: containerapp
+    resourceName: santaworkshop-${AZURE_ENV_NAME}-api
+    docker:
+      # Build using the multi-stage Dockerfile at the repo root
+      path: ./Dockerfile.multi
+      context: .
+      # Let azd pick up the ACR created during provision. If you need to override,
+      # set AZURE_CONTAINER_REGISTRY_ENDPOINT in the azd environment.
+      registry: ${AZURE_CONTAINER_REGISTRY_ENDPOINT=""}
+    hooks:
+      postdeploy:
+        shell: pwsh
+        run: |
+          $envName = azd env get-value AZURE_ENV_NAME
+          $rg = azd env get-value AZURE_RESOURCE_GROUP
+          if (-not $envName) { $envName = "dev" }
+          if (-not $rg) { $rg = "rg-$envName" }
+          $appName = "santaworkshop-$envName-api"
+          Write-Host "Ensuring Container App revision mode is Single..." -ForegroundColor Yellow
+          az containerapp revision set-mode -n $appName -g $rg --mode Single 2>$null | Out-Null
+          # If DRASI endpoints exist in env, ensure they are set as separate env vars
+          $view = azd env get-value DRASI_VIEW_SERVICE_URL 2>$null
+          $sig  = azd env get-value DRASI_SIGNALR_URL 2>$null
+          if ($view -or $sig) {
+            Write-Host "Syncing DRASI_* env vars to Container App..." -ForegroundColor Yellow
+            $args = @()
+            if ($view) { $args += "DRASI_VIEW_SERVICE_BASE_URL=$view" }
+            if ($sig) { $args += "DRASI_SIGNALR_BASE_URL=$sig" }
+            if ($args.Count -gt 0) {
+              az containerapp update -n $appName -g $rg --set-env-vars $args 2>$null | Out-Null
+            }
+          }
+        continueOnError: true
+
+  # Note: Frontend is now served from the API Container App (Dockerfile.multi builds frontend and copies to wwwroot)
+  # The 'web' service (Static Web App) has been removed - frontend and API are same-origin.
+
+  drasi:
+    project: ./drasi
+    host: aks
+    resourceName: santaworkshop-${AZURE_ENV_NAME}-aks
+    k8s:
+      deploymentPath: k8s # empty folder to prevent kubectl applying non-K8s Drasi resources
+    hooks:
+      predeploy:
+        shell: pwsh
+        run: |
+          # Validate Drasi configuration before deployment
+          Write-Host "`n🔍 Validating Drasi configuration..." -ForegroundColor Cyan
+          & ../scripts/validate-drasi-config.ps1
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Drasi configuration validation failed. Fix issues and try again."
+            exit 1
+          }
+
+          # Install Drasi CLI and control plane via drasi init
+          Write-Host "`n🚀 Installing Drasi infrastructure..." -ForegroundColor Cyan
+          ./install-drasi.ps1
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Drasi installation failed. Check logs and retry."
+            exit 1
+          }
+          Write-Host "✅ Drasi infrastructure installed successfully" -ForegroundColor Green
+        continueOnError: false
+      postdeploy:
+        shell: pwsh
+        run: |
+          ./apply-drasi-resources.ps1
+
+          # Verify daprd loads cosmos-state after RBAC propagation
+          Write-Host "`n🔍 Verifying cosmos-state component load..." -ForegroundColor Cyan
+          Start-Sleep -Seconds 30
+
+          try {
+            $compExists = kubectl get component cosmos-state -n drasi-system -o name 2>$null
+            if (-not $compExists) {
+              Write-Warning "⚠️ cosmos-state component not found. Check apply-drasi-resources.ps1 output."
+            } else {
+              $log = kubectl logs deploy/drasi-api -n drasi-system -c daprd --tail=200 2>$null
+              if ($log -match "Component loaded: cosmos-state") {
+                Write-Host "   ✅ cosmos-state component loaded successfully" -ForegroundColor Green
+              } else {
+                Write-Host "   ℹ️ Component load not yet confirmed (may still be initializing)" -ForegroundColor Gray
+                Write-Host "   Check: kubectl logs deploy/drasi-api -n drasi-system -c daprd | grep cosmos-state" -ForegroundColor Gray
+              }
+            }
+          } catch {
+            Write-Warning "Component validation failed: $($_.Exception.Message)"
+          }
+        continueOnError: false

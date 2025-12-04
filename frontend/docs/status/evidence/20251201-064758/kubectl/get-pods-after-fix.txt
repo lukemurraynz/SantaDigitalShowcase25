@@ -1,0 +1,10 @@
+NAME                                       READY   STATUS             RESTARTS      AGE     IP            NODE                             NOMINATED NODE   READINESS GATES
+default-publish-api-7997dbd966-xsg95       0/2     CrashLoopBackOff   4 (46s ago)   2m33s   10.224.0.22   aks-system-12296413-vmss000001   <none>           <none>
+default-query-host-6648c44f9-cqnmv         0/2     CrashLoopBackOff   4 (53s ago)   2m33s   10.224.0.13   aks-system-12296413-vmss000001   <none>           <none>
+default-view-svc-59cc5cf78b-c64fq          0/2     CrashLoopBackOff   4 (59s ago)   2m33s   10.224.0.38   aks-system-12296413-vmss000000   <none>           <none>
+drasi-api-6999764d79-g68dv                 2/2     Running            0             46s     10.224.0.48   aks-system-12296413-vmss000000   <none>           <none>
+drasi-mongo-0                              1/1     Running            0             2m43s   10.224.0.37   aks-system-12296413-vmss000000   <none>           <none>
+drasi-mongo-init-qzdsx                     0/1     Completed          0             27m     10.224.0.56   aks-system-12296413-vmss000000   <none>           <none>
+drasi-redis-0                              1/1     Running            0             2m24s   10.224.0.10   aks-system-12296413-vmss000001   <none>           <none>
+drasi-resource-provider-7858d77494-fck2s   2/2     Running            0             46s     10.224.0.6    aks-system-12296413-vmss000001   <none>           <none>
+

@@ -1,0 +1,14 @@
+kind: Source
+apiVersion: v1
+name: wishlist-eh
+spec:
+  kind: EventHub
+  identity:
+    kind: MicrosoftEntraWorkloadID
+    clientId: ${DRASI_MI_CLIENT_ID}
+  properties:
+    host: ${EVENTHUB_FQDN}
+    eventHubs:
+      - wishlist-events
+    consumerGroup: $Default
+    bootstrapWindow: 7200

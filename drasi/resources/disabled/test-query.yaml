@@ -1,0 +1,10 @@
+kind: ContinuousQuery
+apiVersion: v1
+name: wishlist-trending-1h
+spec:
+  mode: query
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+  query: >
+    MATCH (w) RETURN w

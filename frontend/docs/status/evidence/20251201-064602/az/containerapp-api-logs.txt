@@ -1,0 +1,203 @@
+{"TimeStamp": "2025-11-30T17:46:58.0414", "Log": "Connecting to the container 'api'..."}
+{"TimeStamp": "2025-11-30T17:46:58.08334", "Log": "Successfully Connected to container: 'api' [Revision: 'drasicrhsith-qab-api--0000002', Replica: 'drasicrhsith-qab-api--0000002-7648bb9b87-j5ctl']"}
+{"TimeStamp": "2025-11-30T17:46:48.1661809+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:48.1661854+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:48.1661897+00:00", "Log": "at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1661944+00:00", "Log": "at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:48.1661991+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:48.1662035+00:00", "Log": "at System.Threading.ThreadPoolWorkQueue.Dispatch()"}
+{"TimeStamp": "2025-11-30T17:46:48.1662079+00:00", "Log": "at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()"}
+{"TimeStamp": "2025-11-30T17:46:48.1662121+00:00", "Log": "--- End of stack trace from previous location ---"}
+{"TimeStamp": "2025-11-30T17:46:48.1662163+00:00", "Log": ""}
+{"TimeStamp": "2025-11-30T17:46:48.1662245+00:00", "Log": "Polly[0]"}
+{"TimeStamp": "2025-11-30T17:46:48.1662296+00:00", "Log": "Resilience event occurred. EventName: 'OnRetry', Source: 'IDrasiViewClient-standard//Standard-Retry', Operation Key: '', Result: 'The operation didn't complete within the allowed timeout of '00:00:10'.'"}
+{"TimeStamp": "2025-11-30T17:46:48.166234+00:00", "Log": "Polly.Timeout.TimeoutRejectedException: The operation didn't complete within the allowed timeout of '00:00:10'."}
+{"TimeStamp": "2025-11-30T17:46:48.1662383+00:00", "Log": "---> System.Threading.Tasks.TaskCanceledException: A task was canceled."}
+{"TimeStamp": "2025-11-30T17:46:48.1662427+00:00", "Log": "at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1662477+00:00", "Log": "at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1662521+00:00", "Log": "at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1662564+00:00", "Log": "at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.166261+00:00", "Log": "at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1662655+00:00", "Log": "at Microsoft.Extensions.Http.Resilience.ResilienceHandler.<>c.<<SendAsync>b__3_0>d.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:48.16627+00:00", "Log": "--- End of inner exception stack trace ---"}
+{"TimeStamp": "2025-11-30T17:46:48.1662742+00:00", "Log": "at Polly.Utils.ExceptionUtilities.TrySetStackTrace[T](T exception)"}
+{"TimeStamp": "2025-11-30T17:46:48.1662784+00:00", "Log": "at Polly.Timeout.TimeoutResilienceStrategy.ExecuteCore[TResult,TState](Func`3 callback, ResilienceContext context, TState state)"}
+{"TimeStamp": "2025-11-30T17:46:48.1662827+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)"}
+{"TimeStamp": "2025-11-30T17:46:48.1662869+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:48.1662973+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663019+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:48.1663062+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663107+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663151+00:00", "Log": "at Microsoft.Extensions.Http.Resilience.ResilienceHandler.<>c.<<SendAsync>b__3_0>d.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:48.1663195+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663239+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663283+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663324+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:48.1663367+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663411+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663455+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663499+00:00", "Log": "at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663544+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663586+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:48.166363+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663672+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:48.1663717+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663763+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663862+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663906+00:00", "Log": "at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1663951+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664005+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664052+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664103+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664208+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:48.166424+00:00", "Log": "at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664408+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664459+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664509+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664553+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664586+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664617+00:00", "Log": "at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664649+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:48.166468+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664712+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664743+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664774+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664805+00:00", "Log": "at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664836+00:00", "Log": "at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664867+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:48.1664898+00:00", "Log": "at System.Threading.ThreadPoolWorkQueue.Dispatch()"}
+{"TimeStamp": "2025-11-30T17:46:48.166493+00:00", "Log": "at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()"}
+{"TimeStamp": "2025-11-30T17:46:48.1664975+00:00", "Log": "--- End of stack trace from previous location ---"}
+{"TimeStamp": "2025-11-30T17:46:48.1665007+00:00", "Log": ""}
+{"TimeStamp": "2025-11-30T17:46:49.1534561+00:00", "Log": "Polly[3]"}
+{"TimeStamp": "2025-11-30T17:46:49.1536525+00:00", "Log": "Execution attempt. Source: 'IDrasiViewClient-standard//Standard-Retry', Operation Key: '', Result: 'The circuit is now open and is not allowing calls.', Handled: 'False', Attempt: '1', Execution Time: 0.0156ms"}
+{"TimeStamp": "2025-11-30T17:46:49.1536601+00:00", "Log": "Polly.CircuitBreaker.BrokenCircuitException: The circuit is now open and is not allowing calls."}
+{"TimeStamp": "2025-11-30T17:46:49.1536652+00:00", "Log": "---> Polly.Timeout.TimeoutRejectedException: The operation didn't complete within the allowed timeout of '00:00:10'."}
+{"TimeStamp": "2025-11-30T17:46:49.1536699+00:00", "Log": "---> System.Threading.Tasks.TaskCanceledException: A task was canceled."}
+{"TimeStamp": "2025-11-30T17:46:49.153679+00:00", "Log": "at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.153688+00:00", "Log": "at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537057+00:00", "Log": "at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537097+00:00", "Log": "at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.153713+00:00", "Log": "at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537162+00:00", "Log": "at Microsoft.Extensions.Http.Resilience.ResilienceHandler.<>c.<<SendAsync>b__3_0>d.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.153722+00:00", "Log": "--- End of inner exception stack trace ---"}
+{"TimeStamp": "2025-11-30T17:46:49.1537266+00:00", "Log": "at Polly.Utils.ExceptionUtilities.TrySetStackTrace[T](T exception)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537313+00:00", "Log": "at Polly.Timeout.TimeoutResilienceStrategy.ExecuteCore[TResult,TState](Func`3 callback, ResilienceContext context, TState state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537364+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537401+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537432+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537464+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.1537496+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537531+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537562+00:00", "Log": "at Microsoft.Extensions.Http.Resilience.ResilienceHandler.<>c.<<SendAsync>b__3_0>d.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.1537593+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537624+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537664+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537713+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.1537789+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537838+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537887+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537938+00:00", "Log": "at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1537983+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538033+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538073+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538167+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.1538336+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538371+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538402+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538433+00:00", "Log": "at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538464+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538508+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538557+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538608+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538656+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538705+00:00", "Log": "at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538758+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538795+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538825+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538857+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538888+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.153892+00:00", "Log": "at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538951+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1538982+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1539013+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1539045+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1539075+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.1539107+00:00", "Log": "at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.153914+00:00", "Log": "at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1539172+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1539261+00:00", "Log": "at System.Threading.ThreadPoolWorkQueue.Dispatch()"}
+{"TimeStamp": "2025-11-30T17:46:49.1539294+00:00", "Log": "at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()"}
+{"TimeStamp": "2025-11-30T17:46:49.1539326+00:00", "Log": "--- End of stack trace from previous location ---"}
+{"TimeStamp": "2025-11-30T17:46:49.153937+00:00", "Log": ""}
+{"TimeStamp": "2025-11-30T17:46:49.1539422+00:00", "Log": "--- End of inner exception stack trace ---"}
+{"TimeStamp": "2025-11-30T17:46:49.155864+00:00", "Log": "Services.DrasiViewClient[0]"}
+{"TimeStamp": "2025-11-30T17:46:49.1558718+00:00", "Log": "Unexpected error querying Drasi for wishlist-trending-1h"}
+{"TimeStamp": "2025-11-30T17:46:49.155877+00:00", "Log": "Polly.CircuitBreaker.BrokenCircuitException: The circuit is now open and is not allowing calls."}
+{"TimeStamp": "2025-11-30T17:46:49.1558824+00:00", "Log": "---> Polly.Timeout.TimeoutRejectedException: The operation didn't complete within the allowed timeout of '00:00:10'."}
+{"TimeStamp": "2025-11-30T17:46:49.1558861+00:00", "Log": "---> System.Threading.Tasks.TaskCanceledException: A task was canceled."}
+{"TimeStamp": "2025-11-30T17:46:49.1558893+00:00", "Log": "at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1558924+00:00", "Log": "at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1558955+00:00", "Log": "at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1558987+00:00", "Log": "at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559018+00:00", "Log": "at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.155905+00:00", "Log": "at Microsoft.Extensions.Http.Resilience.ResilienceHandler.<>c.<<SendAsync>b__3_0>d.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.1559081+00:00", "Log": "--- End of inner exception stack trace ---"}
+{"TimeStamp": "2025-11-30T17:46:49.1559112+00:00", "Log": "at Polly.Utils.ExceptionUtilities.TrySetStackTrace[T](T exception)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559144+00:00", "Log": "at Polly.Timeout.TimeoutResilienceStrategy.ExecuteCore[TResult,TState](Func`3 callback, ResilienceContext context, TState state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559175+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559206+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559237+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559269+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.1559301+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559332+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559363+00:00", "Log": "at Microsoft.Extensions.Http.Resilience.ResilienceHandler.<>c.<<SendAsync>b__3_0>d.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.1559394+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559441+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559514+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559663+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.1559703+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559734+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.155978+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559832+00:00", "Log": "at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1559878+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.ExecutionContextCallback(Object s)"}
+{"TimeStamp": "2025-11-30T17:46:49.1560205+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.156026+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1560306+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext()"}
+{"TimeStamp": "2025-11-30T17:46:49.1560352+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1560406+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1560675+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.1560729+00:00", "Log": "at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1560776+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.156082+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1560865+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1560912+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1560963+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.156101+00:00", "Log": "at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561054+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561257+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561302+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561344+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561384+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561428+00:00", "Log": "at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561547+00:00", "Log": "at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561593+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561637+00:00", "Log": "at System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, Boolean allowInlining)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561679+00:00", "Log": "at System.Threading.Tasks.Task.RunContinuations(Object continuationObject)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561722+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetException(Exception exception, Task`1& taskField)"}
+{"TimeStamp": "2025-11-30T17:46:49.1561769+00:00", "Log": "at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1562012+00:00", "Log": "at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)"}
+{"TimeStamp": "2025-11-30T17:46:49.1562061+00:00", "Log": "at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)"}
+{"TimeStamp": "2025-11-30T17:46:49.1562104+00:00", "Log": "at System.Threading.ThreadPoolWorkQueue.Dispatch()"}
+{"TimeStamp": "2025-11-30T17:46:49.1562149+00:00", "Log": "at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()"}
+{"TimeStamp": "2025-11-30T17:46:49.1562196+00:00", "Log": "--- End of stack trace from previous location ---"}
+{"TimeStamp": "2025-11-30T17:46:49.1562239+00:00", "Log": ""}
+{"TimeStamp": "2025-11-30T17:46:49.1562283+00:00", "Log": "--- End of inner exception stack trace ---"}
+{"TimeStamp": "2025-11-30T17:46:49.1562325+00:00", "Log": "at Polly.Outcome`1.ThrowIfException()"}
+{"TimeStamp": "2025-11-30T17:46:49.1562395+00:00", "Log": "at Microsoft.Extensions.Http.Resilience.ResilienceHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1562613+00:00", "Log": "at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.156267+00:00", "Log": "at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)"}
+{"TimeStamp": "2025-11-30T17:46:49.1562719+00:00", "Log": "at Services.DrasiViewClient.GetCurrentResultAsync(String queryContainerId, String queryId, CancellationToken ct) in /src/services/DrasiViewClient.cs:line 49"}
+{"TimeStamp": "2025-11-30T17:46:54.5950811+00:00", "Log": "src[0]"}
+{"TimeStamp": "2025-11-30T17:46:54.5950995+00:00", "Log": "[SignalR] POST /api/hub negotiate=False transport=(unspecified)"}
+

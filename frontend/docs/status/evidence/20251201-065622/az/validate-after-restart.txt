@@ -1,0 +1,53 @@
+
+═══════════════════════════════════════════════════════════
+  ?? Drasi Deployment Validation
+═══════════════════════════════════════════════════════════
+  Resource Group: rg-qab
+  Project: drasicrhsith
+  Environment: qab
+  Prefix: drasicrhsith-qab
+  Namespace: drasi-system
+═══════════════════════════════════════════════════════════
+
+1??  Checking Kubernetes cluster connectivity...
+
+2??  Validating Cosmos DB secrets...
+
+2??  Validating Cosmos DB authentication (Managed Identity preferred)...
+   ?? Managed Identity not detected; validating secret (fallback)
+
+3??  Validating Dapr component configuration...
+
+4??  Checking Drasi pod health...
+
+5??  Checking Drasi CRD installation...
+
+6??  Verifying Cosmos DB resources in Azure...
+
+7??  Verifying resource name consistency...
+   ? EventHub found: drasicrhsith-qab-eh
+   ? ContainerApp found: drasicrhsith-qab-api
+   ? CosmosDB found: drasicrhsith-qab-cosmos
+   ? AKS found: drasicrhsith-qab-aks
+
+═══════════════════════════════════════════════════════════
+  ?? Validation Summary
+═══════════════════════════════════════════════════════════
+
+  ??  WARNINGS (6):
+     ??  cosmos-statestore secret not found in namespace drasi-system
+        Secret will be created by apply-drasi-resources.ps1
+     ??  cosmos-statestore secret not found in namespace drasi-system
+     ??  cosmos-state component not found in namespace drasi-system
+        Component will be created by apply-drasi-resources.ps1
+     ??  Cannot list pods in namespace drasi-system
+
+  ? ERRORS (3):
+     ? Cannot connect to Kubernetes cluster. Run: az aks get-credentials -n drasicrhsith-qab-aks -g rg-qab
+     ? Failed to check CRD installation: Conversion from JSON failed with error: Invalid character after parsing property name. Expected ':' but got: t. Path '', line 2, position 7.
+     ? Cosmos DB account 'drasicrhsith-qab-cosmos' not found in resource group 'rg-qab'
+
+  ?? To fix issues automatically, run:
+     .\scripts\fix-drasi-deployment.ps1 -ResourceGroup rg-qab -Project drasicrhsith -Env qab
+
+

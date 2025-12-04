@@ -1,0 +1,45 @@
+kind: SourceProvider
+apiVersion: v1
+name: EventHub
+spec:
+  services:
+    # Pin to public GHCR images to avoid ACR drift
+    source:
+      image: ghcr.io/drasi-project/source-eventhub-proxy:0.10.0-azure-linux
+    reactivator:
+      image: ghcr.io/drasi-project/source-eventhub-reactivator:0.10.0-azure-linux
+---
+kind: ReactionProvider
+apiVersion: v1
+name: Http
+spec:
+  services:
+    reaction:
+      image: ghcr.io/drasi-project/reaction-http:0.10.0-azure-linux
+---
+kind: ReactionProvider
+apiVersion: v1
+name: SyncDaprStateStore
+spec:
+  services:
+    reaction:
+      image: ghcr.io/drasi-project/reaction-sync-dapr-statestore:0.10.0-azure-linux
+---
+kind: ReactionProvider
+apiVersion: v1
+name: Debug
+spec:
+  services:
+    reaction:
+      image: ghcr.io/drasi-project/reaction-debug:0.10.0-azure-linux
+---
+kind: ReactionProvider
+apiVersion: v1
+name: SignalR
+spec:
+  services:
+    reaction:
+      image: ghcr.io/drasi-project/reaction-signalr:0.10.0-azure-linux
+    gateway:
+      image: ghcr.io/drasi-project/reaction-signalr-gateway:0.10.0-azure-linux
+

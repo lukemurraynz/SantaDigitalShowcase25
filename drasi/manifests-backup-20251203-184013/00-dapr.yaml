@@ -1,0 +1,25 @@
+# Dapr control plane (helm template output v1.14.5) - truncated for brevity; regenerate via helm to update.
+---
+# Source: dapr/charts/dapr_scheduler/templates/dapr_scheduler_poddisruptionbudget.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: dapr-scheduler-server-disruption-budget
+  namespace: dapr-system
+  labels:
+    app: dapr-scheduler-server
+    app.kubernetes.io/component: scheduler
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/name: dapr
+    app.kubernetes.io/part-of: dapr
+    app.kubernetes.io/version: 1.14.5
+spec:
+  maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: dapr-scheduler-server
+      app.kubernetes.io/component: scheduler
+      app.kubernetes.io/managed-by: helm
+      app.kubernetes.io/name: dapr
+      app.kubernetes.io/part-of: dapr
+      app.kubernetes.io/version: 1.14.5

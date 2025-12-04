@@ -1,0 +1,21 @@
+kind: ContinuousQuery
+apiVersion: v1
+name: wishlist-inactive-children-3d
+spec:
+  mode: query
+  queryLanguage: Cypher
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+        nodes:
+          - sourceLabel: wishlist-events
+  view:
+    enabled: true
+    retentionPolicy: latest
+  query: |
+    MATCH (w:`wishlist-events`)
+    WHERE w.requestType = 'gift'
+    WITH w.childId AS childId, max(drasi.changeDateTime(w)) AS lastEvent
+    WHERE lastEvent <= datetime() - duration({ days: 3 })
+    RETURN childId, lastEvent,
+           duration.inDays(lastEvent, datetime()).days AS daysSinceLastEvent

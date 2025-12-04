@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: default-view-svc-public
+  namespace: drasi-system
+  labels:
+    app: drasi-view-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: api
+    protocol: TCP
+    name: http
+  selector:
+    drasi/service: view-svc
+    drasi/resource: default

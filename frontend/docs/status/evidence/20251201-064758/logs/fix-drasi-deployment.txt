@@ -1,0 +1,60 @@
+
+═══════════════════════════════════════════════════════════
+  ?? Drasi Deployment Auto-Fix
+═══════════════════════════════════════════════════════════
+  Resource Group: rg-qab
+  Project: drasicrhsith
+  Environment: qab
+  Prefix: drasicrhsith-qab
+  Cosmos Account: drasicrhsith-qab-cosmos
+  Namespace: drasi-system
+═══════════════════════════════════════════════════════════
+
+1??  Fixing Cosmos DB credentials...
+   Retrieving Cosmos DB endpoint...
+   Retrieved endpoint: https://drasicrhsith-qab-cosmos.documents.azure.com:443/
+   Retrieving Cosmos DB primary key...
+   Retrieved key (length: 88 chars)
+   ?? Secret needs update (mismatch or placeholder detected)
+   Recreating cosmos-statestore secret with actual credentials...
+   Deleted old secret
+   ? Secret created successfully
+
+2??  Fixing Dapr component configuration...
+   ??  Component does not exist yet (will be created by deployment)
+
+3??  Verifying Cosmos DB database and container...
+
+4??  Restarting Drasi pods to pick up configuration changes...
+   Triggering rollout restart...
+   Waiting for pods to stabilize (45 seconds)...
+   Checking pod status...
+   ??  Pod default-publish-api-7997dbd966-xsg95 not fully ready (0/2 ready)
+      Container daprd: CrashLoopBackOff
+      Container publish-api: ImagePullBackOff
+   ??  Pod default-query-host-6648c44f9-cqnmv not fully ready (0/2 ready)
+      Container daprd: CrashLoopBackOff
+      Container query-host: ImagePullBackOff
+   ??  Pod default-view-svc-59cc5cf78b-c64fq not fully ready (0/2 ready)
+      Container daprd: CrashLoopBackOff
+      Container view-svc: ImagePullBackOff
+   ? Pod drasi-api-6999764d79-g68dv healthy (2/2 ready)
+   ? Pod drasi-mongo-0 healthy (1/1 ready)
+   ??  Pod drasi-mongo-init-qzdsx not fully ready (0/1 ready)
+   ? Pod drasi-redis-0 healthy (1/1 ready)
+   ? Pod drasi-resource-provider-7858d77494-fck2s healthy (2/2 ready)
+
+═══════════════════════════════════════════════════════════
+  ?? Fix Summary
+═══════════════════════════════════════════════════════════
+
+  ? FIXES APPLIED (1):
+     ? Created cosmos-statestore secret with actual credentials
+
+  ? FIXES FAILED (2):
+     ? Database 'elves_demo' not found. Run Bicep deployment to create infrastructure.
+     ??  Some pods not fully ready after restart. Check: kubectl logs -n drasi-system <pod-name>
+
+  ?? Manual intervention may be required
+
+

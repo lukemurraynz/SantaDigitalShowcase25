@@ -1,0 +1,19 @@
+kind: ContinuousQuery
+apiVersion: v1
+name: wishlist-trending-1h
+spec:
+  mode: query
+  queryLanguage: Cypher
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+        nodes:
+          - sourceLabel: WishlistItem
+  view:
+    enabled: true
+    retentionPolicy: latest
+  query: >
+    MATCH (w:WishlistItem)
+    WITH w.text AS item, count(w) AS frequency
+    WHERE frequency > 0
+    RETURN item, frequency

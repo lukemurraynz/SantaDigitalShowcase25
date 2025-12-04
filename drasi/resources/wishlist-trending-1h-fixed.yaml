@@ -1,0 +1,20 @@
+kind: ContinuousQuery
+apiVersion: v1
+name: wishlist-trending-1h
+spec:
+  mode: query
+  queryLanguage: Cypher
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+        nodes:
+          - sourceLabel: wishlist-events
+  view:
+    enabled: true
+    retentionPolicy: latest
+  query: |
+    MATCH (w:`wishlist-events`)
+    WHERE drasi.changeDateTime(w) >= datetime() - duration({ minutes: 60 })
+      AND w.requestType = 'gift'
+    RETURN w.text AS item,
+           count(w) AS frequency

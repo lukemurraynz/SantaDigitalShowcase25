@@ -1,0 +1,168 @@
+Name:             default-query-host-6648c44f9-cqnmv
+Namespace:        drasi-system
+Priority:         0
+Service Account:  default
+Node:             aks-system-12296413-vmss000001/10.224.0.4
+Start Time:       Mon, 01 Dec 2025 06:46:20 +1300
+Labels:           dapr.io/app-id=default-query-host
+                  dapr.io/metrics-enabled=true
+                  dapr.io/sidecar-injected=true
+                  drasi/resource=default
+                  drasi/service=query-host
+                  drasi/type=query-container
+                  pod-template-hash=6648c44f9
+Annotations:      dapr.io/app-id: default-query-host
+                  dapr.io/app-port: 3000
+                  dapr.io/config: dapr-config
+                  dapr.io/enabled: true
+                  dapr.io/sidecar-image: daprio/daprd:1.9.0
+Status:           Pending
+IP:               10.224.0.13
+IPs:
+  IP:           10.224.0.13
+Controlled By:  ReplicaSet/default-query-host-6648c44f9
+Containers:
+  query-host:
+    Container ID:   
+    Image:          drasi-project/query-container-query-host:latest
+    Image ID:       
+    Port:           <none>
+    Host Port:      <none>
+    State:          Waiting
+      Reason:       ImagePullBackOff
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     250m
+      memory:  4Gi
+    Requests:
+      cpu:     250m
+      memory:  512Mi
+    Environment:
+      DEFAULT_STORE:                 redis
+      MONGO_RESULT_STORE_COLL_NAME:  Results
+      MONGO_RESULT_STORE_DB_NAME:    Drasi
+      MONGO_URI:                     mongodb://drasi-mongo:27017
+      QUERY_NODE_ID:                 default
+      STORE_0:                       memory
+      STORE_0_ENABLE_ARCHIVE:        false
+      STORE_0_TYPE:                  Memory
+      STORE_1:                       redis
+      STORE_1_CONNECTION_STRING:     redis://drasi-redis:6379
+      STORE_1_TYPE:                  Redis
+      DAPR_HTTP_PORT:                3500
+      DAPR_GRPC_PORT:                50001
+      APP_PROTOCOL:                  http
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-jkbkp (ro)
+  daprd:
+    Container ID:  containerd://39f4eebb34fdec2952eb88245c0b8a149c1cefdb04137b47bd1a02b4ed6c009b
+    Image:         daprio/daprd:1.9.0
+    Image ID:      docker.io/daprio/daprd@sha256:6118f141bcffbed599e1e6dea67df8d9fa7e5042078804abfe588366af38f2f4
+    Ports:         3500/TCP (dapr-http), 50001/TCP (dapr-grpc), 50002/TCP (dapr-internal), 9090/TCP (dapr-metrics)
+    Host Ports:    0/TCP (dapr-http), 0/TCP (dapr-grpc), 0/TCP (dapr-internal), 0/TCP (dapr-metrics)
+    Args:
+      /daprd
+      --dapr-http-port
+      3500
+      --dapr-grpc-port
+      50001
+      --dapr-internal-grpc-port
+      50002
+      --dapr-listen-addresses
+      [::1],127.0.0.1
+      --dapr-public-port
+      3501
+      --app-id
+      default-query-host
+      --app-protocol
+      http
+      --log-level
+      info
+      --dapr-graceful-shutdown-seconds
+      -1
+      --mode
+      kubernetes
+      --control-plane-address
+      dapr-api.dapr-system.svc.cluster.local:443
+      --sentry-address
+      dapr-sentry.dapr-system.svc.cluster.local:443
+      --app-port
+      3000
+      --enable-metrics
+      --metrics-port
+      9090
+      --config
+      dapr-config
+      --placement-host-address
+      dapr-placement-server.dapr-system.svc.cluster.local:50005
+      --enable-mtls
+    State:          Waiting
+      Reason:       CrashLoopBackOff
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Mon, 01 Dec 2025 06:47:18 +1300
+      Finished:     Mon, 01 Dec 2025 06:47:18 +1300
+    Ready:          False
+    Restart Count:  3
+    Liveness:       http-get http://:3501/v1.0/healthz delay=3s timeout=3s period=6s #success=1 #failure=3
+    Readiness:      http-get http://:3501/v1.0/healthz delay=3s timeout=3s period=6s #success=1 #failure=3
+    Environment:
+      NAMESPACE:                       drasi-system
+      DAPR_TRUST_ANCHORS:              -----BEGIN CERTIFICATE-----
+                                       MIIBcjCCARegAwIBAgIRAPEYBDsLsY7ZL6j1+mA2LCgwCgYIKoZIzj0EAwIwGDEW
+                                       MBQGA1UEChMNY2x1c3Rlci5sb2NhbDAeFw0yNTExMzAxNzA2NTJaFw0yNjExMzAx
+                                       NzIxNTJaMBgxFjAUBgNVBAoTDWNsdXN0ZXIubG9jYWwwWTATBgcqhkjOPQIBBggq
+                                       hkjOPQMBBwNCAARUmcbky9QLvZAjIbHwOZ04pXKwOB5uZi8PnfZpwLVIur5K2wHX
+                                       qPEXWJrWzRItrz6WC8c36iKN9IS5/mcqNXcbo0IwQDAOBgNVHQ8BAf8EBAMCAqQw
+                                       DwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUCKuOEXlb/q/MxBWm8WXXgxUQUgcw
+                                       CgYIKoZIzj0EAwIDSQAwRgIhAP++NGgEnymEEGjo+2PHbfePZpp16nXlM1B5PkXV
+                                       A1ywAiEAn/lhpiMyXEtQpxDdWvoctVt09clkLOZIWrTopuZS4qU=
+                                       -----END CERTIFICATE-----
+                                       
+      POD_NAME:                        default-query-host-6648c44f9-cqnmv (v1:metadata.name)
+      DAPR_CONTROLPLANE_NAMESPACE:     dapr-system
+      DAPR_CONTROLPLANE_TRUST_DOMAIN:  cluster.local
+      DAPR_SCHEDULER_HOST_ADDRESS:     dapr-scheduler-server-0.dapr-scheduler-server.dapr-system.svc.cluster.local:50006
+    Mounts:
+      /var/run/secrets/dapr.io/sentrytoken from dapr-identity-token (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-jkbkp (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-jkbkp:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+  dapr-identity-token:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  7200
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/memory-pressure:NoSchedule op=Exists
+                             node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                 From               Message
+  ----     ------     ----                ----               -------
+  Normal   Scheduled  101s                default-scheduler  Successfully assigned drasi-system/default-query-host-6648c44f9-cqnmv to aks-system-12296413-vmss000001
+  Normal   Pulling    99s                 kubelet            Pulling image "daprio/daprd:1.9.0"
+  Normal   Pulled     94s                 kubelet            Successfully pulled image "daprio/daprd:1.9.0" in 5.232s (5.232s including waiting). Image size: 38393280 bytes.
+  Normal   Started    73s (x3 over 94s)   kubelet            Started container daprd
+  Normal   Pulling    58s (x3 over 101s)  kubelet            Pulling image "drasi-project/query-container-query-host:latest"
+  Warning  Failed     56s (x3 over 99s)   kubelet            Failed to pull image "drasi-project/query-container-query-host:latest": failed to pull and unpack image "docker.io/drasi-project/query-container-query-host:latest": failed to resolve reference "docker.io/drasi-project/query-container-query-host:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+  Warning  Failed     56s (x3 over 99s)   kubelet            Error: ErrImagePull
+  Warning  BackOff    56s (x8 over 91s)   kubelet            Back-off restarting failed container daprd in pod default-query-host-6648c44f9-cqnmv_drasi-system(a786c0ec-9987-4533-94fd-1689b71c1ceb)
+  Normal   Created    43s (x4 over 94s)   kubelet            Created container: daprd
+  Normal   BackOff    43s (x10 over 93s)  kubelet            Back-off pulling image "drasi-project/query-container-query-host:latest"
+  Normal   Pulled     43s (x3 over 92s)   kubelet            Container image "daprio/daprd:1.9.0" already present on machine
+  Warning  Failed     42s (x11 over 93s)  kubelet            Error: ImagePullBackOff
+

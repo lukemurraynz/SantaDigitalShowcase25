@@ -1,0 +1,6 @@
+# Docker context from src/ - only exclude what we don't need
+bin/
+obj/
+*.log
+.env
+.env.*

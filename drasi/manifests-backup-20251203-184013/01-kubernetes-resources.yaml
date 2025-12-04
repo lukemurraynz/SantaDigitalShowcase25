@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: drasi-manifest-placeholder
+  namespace: default
+data:
+  note: "Drasi installed via drasi CLI predeploy hook."

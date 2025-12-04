@@ -1,0 +1,2 @@
+deployment.apps/default-publish-api scaled
+

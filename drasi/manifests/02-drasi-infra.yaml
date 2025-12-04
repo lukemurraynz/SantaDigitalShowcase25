@@ -1,0 +1,323 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: drasi-system
+  labels:
+    app: drasi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: drasi-resource-provider
+  namespace: drasi-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: drasi-resource-provider
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "delete", "update"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "list", "watch", "create", "delete", "update", "patch"]
+  - apiGroups: ["dapr.io"]
+    resources: ["components"]
+    verbs: ["get", "list", "watch", "create", "delete", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: drasi-resource-provider
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: drasi-resource-provider
+subjects:
+  - kind: ServiceAccount
+    name: drasi-resource-provider
+    namespace: drasi-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drasi-redis
+  namespace: drasi-system
+spec:
+  selector:
+    app: drasi-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: drasi-redis
+  namespace: drasi-system
+  labels:
+    app: drasi-redis
+spec:
+  serviceName: drasi-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drasi-redis
+  template:
+    metadata:
+      labels:
+        app: drasi-redis
+    spec:
+      containers:
+        - name: redis
+          image: ghcr.io/drasi-project/redis:7-alpine
+          command: ["redis-server"]
+          ports:
+            - containerPort: 6379
+              name: redis
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drasi-mongo
+  namespace: drasi-system
+spec:
+  selector:
+    app: drasi-mongo
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: drasi-mongo
+  namespace: drasi-system
+  labels:
+    app: drasi-mongo
+spec:
+  serviceName: drasi-mongo
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drasi-mongo
+  template:
+    metadata:
+      labels:
+        app: drasi-mongo
+    spec:
+      containers:
+        - name: mongo
+          image: ghcr.io/drasi-project/mongo:6
+          args:
+            ["--dbpath", "/data/db", "--replSet", "rs0", "--bind_ip", "0.0.0.0"]
+          ports:
+            - containerPort: 27017
+              name: mongo
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: drasi-mongo-init
+  namespace: drasi-system
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mongo-init
+          image: ghcr.io/drasi-project/mongo:6
+          command:
+            - bash
+            - -c
+            - |
+              set -e
+              echo "Waiting for Mongo to be ready..."
+              until mongosh --host drasi-mongo --eval 'db.runCommand({ ping: 1 })' >/dev/null 2>&1; do
+                echo "Mongo not ready yet, sleeping..."; sleep 2;
+              done
+              echo "Initializing replica set (rs0) if needed..."
+              mongosh --host drasi-mongo --eval 'rs.initiate({_id:"rs0", members:[{_id:0, host:"drasi-mongo:27017"}]})' || true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drasi-resource-provider
+  namespace: drasi-system
+  labels:
+    drasi/infra: resource-provider
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      drasi/infra: resource-provider
+  template:
+    metadata:
+      labels:
+        drasi/infra: resource-provider
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: resource-provider
+        dapr.io/app-port: "8080"
+        dapr.io/sidecar-image: daprio/daprd:1.14.5
+    spec:
+      serviceAccountName: drasi-resource-provider
+      containers:
+        - name: kubernetes-provider
+          image: ghcr.io/drasi-project/kubernetes-provider:0.9.2
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drasi-api
+  namespace: drasi-system
+  labels:
+    drasi/infra: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      drasi/infra: api
+  template:
+    metadata:
+      labels:
+        drasi/infra: api
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: api
+        dapr.io/app-port: "8080"
+        dapr.io/sidecar-image: daprio/daprd:1.14.5
+    spec:
+      containers:
+        - name: drasi-api
+          image: ghcr.io/drasi-project/api:0.9.2
+          ports:
+            - containerPort: 8080
+              name: api
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MONGO_URI
+              value: mongodb://drasi-mongo:27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drasi-api
+  namespace: drasi-system
+spec:
+  selector:
+    drasi/infra: api
+  ports:
+    - name: api
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: statestore
+  namespace: drasi-system
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+    - name: redisHost
+      value: drasi-redis:6379
+    # Explicitly disable actor state on redis to avoid duplication with drasi-state (Mongo actor store)
+    - name: actorStateStore
+      value: "false"
+    - name: keyPrefix
+      value: drasi
+    - name: redisType
+      value: node
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: drasi-pubsub
+  namespace: drasi-system
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+    - name: redisHost
+      value: drasi-redis:6379
+    - name: concurrency
+      value: "1"
+    - name: queueDepth
+      value: "100000"
+    - name: consumerID
+      value: drasi
+    - name: redisPassword
+      value: ""

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drasi-controller
+  namespace: drasi
+  labels:
+    app: drasi-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drasi-controller
+  template:
+    metadata:
+      labels:
+        app: drasi-controller
+    spec:
+      serviceAccountName: drasi-sa
+      containers:
+        - name: drasi
+          # Drasi controller image (override via GHCR credentials if private). Update DRASI_CONTROLLER_IMAGE env to change.
+          # If image pull fails, set GHCR_USERNAME/GHCR_PAT in azd env before deploy.
+          image: ghcr.io/drasi-project/drasi-controller:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: API_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: drasi-app-config
+                  key: API_BASE_URL
+            - name: COSMOS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: drasi-app-secrets
+                  key: COSMOS_CONNECTION_STRING
+            - name: COSMOS_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: drasi-app-config
+                  key: COSMOS_DATABASE
+            # Managed Identity auth: EVENTHUB_FQDN replaces EVENTHUB_CONNECTION (secret) for Event Hub source
+            - name: EVENTHUB_FQDN
+              valueFrom:
+                configMapKeyRef:
+                  name: drasi-app-config
+                  key: EVENTHUB_FQDN
+            - name: AGENT_TRIGGER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: drasi-app-secrets
+                  key: AGENT_TRIGGER_SECRET
+          volumeMounts:
+            - name: graph
+              mountPath: /etc/drasi/graph
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+      volumes:
+        - name: graph
+          configMap:
+            name: drasi-graph
+      restartPolicy: Always

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drasi-view-service
+  namespace: drasi-system
+  labels:
+    app: drasi-view-service
+    drasi/service: view-svc
+    drasi/resource: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drasi-view-service
+      drasi/service: view-svc
+      drasi/resource: default
+  template:
+    metadata:
+      labels:
+        app: drasi-view-service
+        drasi/service: view-svc
+        drasi/resource: default
+    spec:
+      serviceAccountName: drasi-sa
+      containers:
+        - name: view-service
+          image: ghcr.io/drasi-project/view-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: API_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: drasi-app-config
+                  key: API_BASE_URL
+            - name: COSMOS_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: drasi-app-config
+                  key: COSMOS_DATABASE
+            - name: EVENTHUB_FQDN
+              valueFrom:
+                configMapKeyRef:
+                  name: drasi-app-config
+                  key: EVENTHUB_FQDN

@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wishlist-signalr-reaction-override
+  namespace: drasi-system
+  labels:
+    app: wishlist-signalr-reaction-override
+    drasi/resource: wishlist-signalr
+    drasi/service: reaction
+    drasi/type: reaction
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wishlist-signalr-reaction-override
+  template:
+    metadata:
+      labels:
+        app: wishlist-signalr-reaction-override
+        drasi/resource: wishlist-signalr
+        drasi/service: reaction
+        drasi/type: reaction
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: wishlist-signalr-reaction-override
+        dapr.io/app-port: "8080"
+        dapr.io/config: dapr-config
+    spec:
+      containers:
+        - name: reaction
+          image: ghcr.io/drasi-project/reaction-signalr:0.10.0-azure-linux
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: queries
+              mountPath: /etc/queries
+          env:
+            - name: PubsubName
+              value: drasi-pubsub-wishlist-signalr
+            - name: DAPR_HTTP_PORT
+              value: "3500"
+            - name: DAPR_GRPC_PORT
+              value: "50001"
+            - name: APP_PROTOCOL
+              value: http
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+      volumes:
+        - name: queries
+          configMap:
+            name: wishlist-signalr-reaction-queries-override
+            optional: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wishlist-signalr-reaction-queries-override
+  namespace: drasi-system
+data:
+  queries.json: |
+    {
+      "queries": [
+        "wishlist-updates",
+        "wishlist-trending-1h",
+        "wishlist-duplicates-global",
+        "wishlist-inactive-children-3d",
+        "wishlist-duplicates-by-child"
+      ]
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wishlist-signalr-reaction-override
+  namespace: drasi-system
+  labels:
+    app: wishlist-signalr-reaction-override
+    drasi/resource: wishlist-signalr
+    drasi/service: reaction
+    drasi/type: reaction
+spec:
+  type: LoadBalancer
+  selector:
+    app: wishlist-signalr-reaction-override
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

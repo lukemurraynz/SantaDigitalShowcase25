@@ -1,0 +1,3 @@
+Waiting for deployment "default-publish-api" rollout to finish: 1 old replicas are pending termination...
+error: deployment "default-publish-api" exceeded its progress deadline
+

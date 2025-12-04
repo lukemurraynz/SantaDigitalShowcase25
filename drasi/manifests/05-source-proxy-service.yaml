@@ -1,0 +1,22 @@
+# Drasi EventHub Source Proxy Service
+# WORKAROUND: Drasi query-api streaming invoker uses short DNS names (http://app-id/path)
+# instead of Dapr HTTP API (http://localhost:3500/v1.0/invoke/app-id/method/path).
+# This service enables Kubernetes DNS resolution for the proxy app-id.
+apiVersion: v1
+kind: Service
+metadata:
+  name: wishlist-eh-proxy
+  namespace: drasi-system
+  labels:
+    app: drasi
+    drasi/resource: wishlist-eh
+    drasi/service: proxy
+spec:
+  selector:
+    drasi/resource: wishlist-eh
+    drasi/service: source
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80

@@ -1,0 +1,2 @@
+Unable to connect to the server: dial tcp: lookup drasicrhsithqabaks-pxxbdqnz.hcp.australiaeast.azmk8s.io: no such host
+

@@ -1,0 +1,21 @@
+kind: ContinuousQuery
+apiVersion: v1
+name: test-working-copy
+spec:
+  mode: query
+  queryLanguage: Cypher
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+        nodes:
+          - sourceLabel: WishlistItem
+  view:
+    enabled: true
+    retentionPolicy: latest
+  query: >
+    MATCH (w:WishlistItem)
+    WITH coalesce(w.text, 'unknown') AS item, w.childId AS childId
+    WITH item, collect(distinct childId) AS children
+    WITH item, children, size(children) AS childCount
+    WHERE childCount >= 2
+    RETURN item, childCount, children

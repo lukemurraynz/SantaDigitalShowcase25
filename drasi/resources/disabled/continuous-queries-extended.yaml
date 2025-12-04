@@ -1,0 +1,48 @@
+---
+kind: ContinuousQuery
+apiVersion: v1
+name: wishlist-duplicates-global
+spec:
+  mode: query
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+        nodes:
+          - sourceLabel: WishlistItem
+  query: >
+    MATCH (w:WishlistItem)
+    WITH w.text AS item, count(w) AS totalCount
+    WHERE totalCount > 1
+    RETURN item, totalCount
+---
+kind: ContinuousQuery
+apiVersion: v1
+name: wishlist-inactive-children-3d
+spec:
+  mode: query
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+        nodes:
+          - sourceLabel: WishlistItem
+  query: >
+    MATCH (w:WishlistItem)
+    WITH w.childId AS childId, max(drasi.changeDateTime(w)) AS lastEvent
+    WHERE lastEvent <= datetime.realtime() - duration({ days: 3 })
+    RETURN childId, lastEvent
+---
+kind: ContinuousQuery
+apiVersion: v1
+name: wishlist-duplicates-by-child
+spec:
+  mode: query
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+        nodes:
+          - sourceLabel: WishlistItem
+  query: >
+    MATCH (w:WishlistItem)
+    WITH w.childId AS childId, w.text AS item, count(w) AS duplicateCount
+    WHERE duplicateCount > 1
+    RETURN childId, item, duplicateCount

@@ -1,0 +1,63 @@
+Name:                   default-query-host
+Namespace:              drasi-system
+CreationTimestamp:      Mon, 01 Dec 2025 06:46:20 +1300
+Labels:                 drasi/resource=default
+                        drasi/service=query-host
+                        drasi/type=query-container
+Annotations:            deployment.kubernetes.io/revision: 2
+                        drasi/spechash: af9f92b85f42513f
+Selector:               drasi/resource=default,drasi/service=query-host,drasi/type=query-container
+Replicas:               1 desired | 1 updated | 2 total | 0 available | 2 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:       drasi/resource=default
+                drasi/service=query-host
+                drasi/type=query-container
+  Annotations:  dapr.io/app-id: default-query-host
+                dapr.io/app-port: 3000
+                dapr.io/config: dapr-config
+                dapr.io/enabled: true
+                dapr.io/sidecar-image: daprio/daprd:1.9.0
+                kubectl.kubernetes.io/restartedAt: 2025-12-01T06:56:26+13:00
+  Containers:
+   query-host:
+    Image:      drasi-project/query-container-query-host:latest
+    Port:       <none>
+    Host Port:  <none>
+    Limits:
+      cpu:     250m
+      memory:  4Gi
+    Requests:
+      cpu:     250m
+      memory:  512Mi
+    Environment:
+      DEFAULT_STORE:                 redis
+      MONGO_RESULT_STORE_COLL_NAME:  Results
+      MONGO_RESULT_STORE_DB_NAME:    Drasi
+      MONGO_URI:                     mongodb://drasi-mongo:27017
+      QUERY_NODE_ID:                 default
+      STORE_0:                       memory
+      STORE_0_ENABLE_ARCHIVE:        false
+      STORE_0_TYPE:                  Memory
+      STORE_1:                       redis
+      STORE_1_CONNECTION_STRING:     redis://drasi-redis:6379
+      STORE_1_TYPE:                  Redis
+    Mounts:                          <none>
+  Volumes:                           <none>
+  Node-Selectors:                    <none>
+  Tolerations:                       <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      False   MinimumReplicasUnavailable
+  Progressing    False   ProgressDeadlineExceeded
+OldReplicaSets:  default-query-host-6648c44f9 (1/1 replicas created)
+NewReplicaSet:   default-query-host-5c9b69855d (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  20m   deployment-controller  Scaled up replica set default-query-host-6648c44f9 from 0 to 1
+  Normal  ScalingReplicaSet  10m   deployment-controller  Scaled up replica set default-query-host-5c9b69855d from 0 to 1
+

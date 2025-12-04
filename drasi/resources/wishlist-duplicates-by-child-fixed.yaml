@@ -1,0 +1,20 @@
+kind: ContinuousQuery
+apiVersion: v1
+name: wishlist-duplicates-by-child
+spec:
+  mode: query
+  queryLanguage: Cypher
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+        nodes:
+          - sourceLabel: wishlist-events
+  view:
+    enabled: true
+    retentionPolicy: latest
+  query: |
+    MATCH (w:`wishlist-events`)
+    WHERE w.requestType = 'gift'
+    WITH w.childId AS childId, w.text AS item, count(w) AS duplicateCount
+    WHERE duplicateCount > 1
+    RETURN childId, item, duplicateCount

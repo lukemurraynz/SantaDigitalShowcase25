@@ -1,0 +1,31 @@
+kind: Source
+apiVersion: v1
+name: wishlist-eh
+spec:
+  kind: EventHub
+  identity:
+    kind: MicrosoftEntraWorkloadID
+    clientId: e16183ab-275b-491b-bbaa-189282ce9c29
+  properties:
+    host: santaworkshop-nks-eh.servicebus.windows.net
+    eventHubs:
+      - wishlist-events
+    bootstrapWindow: 7200
+  middleware:
+    - kind: map
+      name: wishlist-mapper
+      wishlist-events:
+        insert:
+          - selector: $
+            op: Insert
+            label: WishlistItem
+            id: $.id
+            properties:
+              id: $.id
+              childId: $.childId
+              text: $.text
+              category: $.category
+              budgetEstimate: $.budgetEstimate
+              createdAt: $.createdAt
+              dedupeKey: $.dedupeKey
+              type: $.type

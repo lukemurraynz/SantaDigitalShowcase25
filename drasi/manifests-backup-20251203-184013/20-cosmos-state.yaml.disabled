@@ -1,0 +1,27 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: cosmos-state
+  namespace: drasi-system
+spec:
+  type: state.azure.cosmosdb
+  version: v1
+  metadata:
+    # Endpoint for the Cosmos DB account
+    - name: url
+      secretKeyRef:
+        name: cosmos-statestore
+        key: endpoint
+    # Primary key for the account
+    - name: masterKey
+      secretKeyRef:
+        name: cosmos-statestore
+        key: key
+    # SQL API database + container to use for wishlist sync state
+    - name: database
+      value: wishlist
+    - name: collection
+      value: wishlistState
+    # Ensure keys are not auto-prefixed by Dapr so reaction provided keys remain stable
+    - name: keyPrefix
+      value: none

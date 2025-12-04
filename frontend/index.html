@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Santa's Digital Elves</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: var(
+          --winter-sky,
+          linear-gradient(180deg, #0f0f4a 0%, #191970 50%, #2c3e90 100%)
+        );
+        font-family: system-ui, sans-serif;
+        color: var(--text-primary, #fff);
+      }
+      #root {
+        min-height: 100vh;
+      }
+      a {
+        color: var(--gold-accent, #ffd700);
+        text-decoration: none;
+      }
+      a:hover {
+        color: var(--gold-accent-light, #ffed4e);
+      }
+      button {
+        font-family: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Runtime injected API base for environments where build-time VITE_API_URL is absent.
+      // Leave empty to use VITE_API_URL from build-time environment
+      // This will be populated by prebuild.ps1 during azd deploy
+      window.__API_BASE__ = "";
+
+      // SignalR hub URL for Drasi reaction gateway override (public LB)
+      // If unset or empty, frontend falls back to `${API_URL}/api/hub` which is the app hub
+      // The frontend will automatically detect HTTPS pages and avoid insecure HTTP endpoints
+      // to prevent mixed content blocks. Leave empty for Azure Static Web Apps deployments.
+      window.__SIGNALR_HUB__ = "";
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

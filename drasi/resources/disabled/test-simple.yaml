@@ -1,0 +1,10 @@
+kind: ContinuousQuery
+apiVersion: v1
+name: test-simple
+spec:
+  mode: query
+  sources:
+    subscriptions:
+      - id: wishlist-eh
+  query: >
+    MATCH (w) RETURN w

@@ -1,0 +1,2 @@
+deployment.apps/default-query-host image updated
+
