@@ -2,6 +2,8 @@
 
 Santa's Digital Elves is an event-driven demo application that detects wishlist and profile updates from children, processes them using real-time event streaming with [Drasi](https://drasi.io/), and generates intelligent "Naughty & Nice Gift Reports" using Azure AI.
 
+[Video - Santa's Digital Showcase (Drasi + Mirosoft Agent Framework)](https://youtu.be/3G7Dg_VI27M)
+
 ## 🎯 What This Solution Does
 
 - **Real-time Event Detection**: Uses Drasi for continuous query processing on event streams
