@@ -21,6 +21,8 @@ Santa's Digital Elves is an event-driven demo application that detects wishlist 
 | **Infrastructure**   | Azure Container Apps, Azure Key Vault, AKS for Drasi       |
 | **Scripting**        | PowerShell for deployment and automation                   |
 
+![🎅 Santa's Workshop Dashboard](overview.jpg)
+
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
