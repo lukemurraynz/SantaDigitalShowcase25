@@ -3,16 +3,20 @@
 > ⚠️ **Script Migration Notice**: The `simulate-naughty-nice.ps1` script has been consolidated into `demo-interactive.ps1`. Use `.\scripts\demo-interactive.ps1` and select Scenario 4 for Naughty/Nice testing.
 
 ## Overview
+
 This guide shows how to use the new letter to North Pole system with real-time naughty/nice behavior tracking.
 
 ## Prerequisites
-- Backend service running (`dotnet run --project src`)
+
+- Backend service running (`dotnet run --project src`) or deployed via `azd up`
+- For deployed instances, replace `localhost:8080` with your Container App URL
 - Drasi configured with updated continuous queries
 - Azure OpenAI endpoint configured
 
 ## Scenario 1: Child Sends Gift Request
 
 ### Submit a Letter for Gifts
+
 ```powershell
 $giftLetter = @{
     text = "LEGO Space Shuttle"
@@ -27,6 +31,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/v1/children/child-123/wishlist
 ```
 
 **Response:**
+
 ```json
 {
   "wishlistItem": {
@@ -55,6 +60,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/v1/children/child-123/wishlist
 ### A. Child Becomes Nice ✨
 
 **What Happens:**
+
 1. Letter sent to North Pole with behavior update
 2. Drasi detects `behavior-update` event via `naughty-nice-changes` query
 3. `NaughtyNiceEventHandler` processes the change
@@ -65,6 +71,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/v1/children/child-123/wishlist
 ### B. Child Becomes Naughty 😞
 
 **What Happens:**
+
 1. Letter sent to North Pole with behavior update
 2. Drasi detects `behavior-update` event
 3. `NaughtyNiceEventHandler` processes the change
@@ -75,11 +82,13 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/v1/children/child-123/wishlist
 ## Scenario 3: Check Child's Current Status
 
 ### Via API Endpoint (Future)
+
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:8080/api/v1/children/child-123/profile"
 ```
 
 **Response:**
+
 ```json
 {
   "id": "child-123",
@@ -105,6 +114,7 @@ Get-Content reports/child-alice-drasi.md
 ```
 
 **Report Contents:**
+
 - Child summary
 - Current behavior status (Nice/Naughty/Unknown)
 - Gift recommendations (adjusted based on status)
@@ -177,18 +187,21 @@ drasi query get naughty-nice-changes --watch
 ## Troubleshooting
 
 ### Behavior Update Not Detected
+
 1. Verify Drasi is running: `kubectl get pods -n drasi-system`
 2. Check continuous query: `drasi query get naughty-nice-changes`
 3. Verify Event Hub connection
 4. Check application logs for handler errors
 
 ### Recommendations Not Updated
+
 1. Ensure `NaughtyNiceEventHandler` is registered in DI container
 2. Verify Agent Framework endpoint (AZURE_OPENAI_ENDPOINT)
 3. Check recommendation service is accessible
 4. Review handler logs for exceptions
 
 ### Report Not Generated
+
 1. Wait full 90 seconds (simulator waits automatically)
 2. Check `reports/` directory exists
 3. Verify job processing succeeded
@@ -260,6 +273,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/v1/children/child-demo/recomme
 ## Support
 
 For issues or questions:
+
 1. Check `IMPLEMENTATION-NAUGHTY-NICE.md` for architecture details
 2. Review `NAUGHTY-NICE-STORY.md` for story overview
 3. Check application logs for errors

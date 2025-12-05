@@ -25,10 +25,7 @@ public class CosmosRepositoryBaseTests
     [Fact]
     public void Constructor_ValidParameters_InitializesCorrectly()
     {
-        // Act
         var repository = new TestRepository(_cosmosMock.Object, _configMock.Object);
-
-        // Assert
         Assert.NotNull(repository);
         _cosmosMock.Verify(c => c.GetContainer("test-container"), Times.Once);
     }

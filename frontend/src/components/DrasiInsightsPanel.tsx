@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { API_URL } from '../config';
+import { POLLING_CONFIG } from '../constants/polling';
 import type { DrasiInsights } from '../types/drasi';
+import { logger } from '../utils/logger';
 import { Panel, PanelHeader } from './shared';
 
 export const DrasiInsightsPanel: React.FC = () => {
@@ -12,7 +14,6 @@ export const DrasiInsightsPanel: React.FC = () => {
   // Fetch insights from API
   useEffect(() => {
     let consecutiveFailures = 0;
-    const MAX_FAILURES = 5;
 
     const fetchInsights = async () => {
       try {
@@ -25,8 +26,8 @@ export const DrasiInsightsPanel: React.FC = () => {
       } catch (e: any) {
         consecutiveFailures++;
         setError(e.message || 'Failed to load Drasi insights');
-        if (consecutiveFailures >= MAX_FAILURES) {
-          console.warn('DrasiInsights: Too many failures, stopping polling');
+        if (consecutiveFailures >= POLLING_CONFIG.MAX_CONSECUTIVE_FAILURES) {
+          logger.warn('DrasiInsights: Too many failures, stopping polling');
           clearInterval(interval);
         }
       } finally {
@@ -56,7 +57,7 @@ export const DrasiInsightsPanel: React.FC = () => {
     es.onerror = () => {
       retryCount++;
       if (retryCount >= MAX_RETRIES) {
-        console.warn('DrasiInsights stream: Max retries reached, stopping');
+        logger.warn('DrasiInsights stream: Max retries reached, stopping');
         es.close();
         return;
       }

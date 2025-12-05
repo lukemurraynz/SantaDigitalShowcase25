@@ -50,11 +50,7 @@ public class RecommendationServiceTests
             _drasiMock.Object, 
             _configMock.Object, 
             _loggerMock.Object);
-
-        // Act
         var result = await service.GetTopNAsync("naughty-child", 3, CancellationToken.None);
-
-        // Assert
         Assert.Equal(3, result.Count);
         Assert.Contains(result, r => r.Suggestion.Contains("Coal"));
         Assert.All(result, r => Assert.Equal("naughty-child", r.ChildId));
@@ -63,7 +59,6 @@ public class RecommendationServiceTests
     [Fact]
     public async Task GetTopNAsync_NiceChild_FallbackReturnsFunRewardingItems()
     {
-        // Arrange
         _profileMock
             .Setup(p => p.GetChildProfileAsync("nice-child", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ChildProfile(
@@ -80,11 +75,7 @@ public class RecommendationServiceTests
             _drasiMock.Object, 
             _configMock.Object, 
             _loggerMock.Object);
-
-        // Act
         var result = await service.GetTopNAsync("nice-child", 3, CancellationToken.None);
-
-        // Assert
         Assert.Equal(3, result.Count);
         Assert.Contains(result, r => r.Suggestion.Contains("LEGO") || r.Suggestion.Contains("Nintendo"));
         Assert.All(result, r => Assert.Equal("nice-child", r.ChildId));
@@ -95,7 +86,6 @@ public class RecommendationServiceTests
     [Fact]
     public async Task GetTopNAsync_UnknownStatus_FallbackReturnsDefaultItems()
     {
-        // Arrange
         _profileMock
             .Setup(p => p.GetChildProfileAsync("new-child", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ChildProfile(
@@ -112,11 +102,7 @@ public class RecommendationServiceTests
             _drasiMock.Object, 
             _configMock.Object, 
             _loggerMock.Object);
-
-        // Act
         var result = await service.GetTopNAsync("new-child", 3, CancellationToken.None);
-
-        // Assert
         Assert.Equal(3, result.Count);
         Assert.All(result, r => Assert.Equal("new-child", r.ChildId));
     }
@@ -124,7 +110,6 @@ public class RecommendationServiceTests
     [Fact]
     public async Task GetTopNAsync_NoProfile_FallbackReturnsDefaultItems()
     {
-        // Arrange
         _profileMock
             .Setup(p => p.GetChildProfileAsync("missing-child", It.IsAny<CancellationToken>()))
             .ReturnsAsync((ChildProfile?)null);
@@ -134,11 +119,7 @@ public class RecommendationServiceTests
             _drasiMock.Object, 
             _configMock.Object, 
             _loggerMock.Object);
-
-        // Act
         var result = await service.GetTopNAsync("missing-child", 3, CancellationToken.None);
-
-        // Assert
         Assert.Equal(3, result.Count);
         Assert.All(result, r => Assert.Equal("missing-child", r.ChildId));
     }
@@ -146,7 +127,6 @@ public class RecommendationServiceTests
     [Fact]
     public async Task GetTopNAsync_NaughtyChild_AllRecommendationsHavePositiveRationales()
     {
-        // Arrange
         _profileMock
             .Setup(p => p.GetChildProfileAsync("naughty-child", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ChildProfile(
@@ -163,8 +143,6 @@ public class RecommendationServiceTests
             _drasiMock.Object, 
             _configMock.Object, 
             _loggerMock.Object);
-
-        // Act
         var result = await service.GetTopNAsync("naughty-child", 4, CancellationToken.None);
 
         // Assert - even naughty children get encouraging rationales

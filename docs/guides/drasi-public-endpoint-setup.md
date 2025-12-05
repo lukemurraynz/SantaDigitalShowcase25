@@ -30,15 +30,18 @@ azd up
 
 ### 1. Added LoadBalancer Manifest
 
-**File**: `drasi/manifests/drasi-view-service-lb.yaml`
+**File**: `drasi/manifests/archive/drasi-view-service-lb.yaml` (archived - not used by automated deployment)
 
-Creates a public LoadBalancer that exposes the Drasi view service on port 80.
+**Note**: The automated deployment script creates the LoadBalancer dynamically. This manifest file is archived as it's not required for `azd up` to work.
+
+The script creates a public LoadBalancer that exposes the Drasi view service on port 80.
 
 ### 2. Updated Postdeploy Script
 
 **File**: `drasi/apply-drasi-resources.ps1`
 
 Added automation at the end of the script:
+
 - Applies LoadBalancer manifest
 - Waits for public IP assignment
 - Auto-configures Container App with `DRASI_VIEW_SERVICE_BASE_URL`
@@ -48,6 +51,7 @@ Added automation at the end of the script:
 **File**: `src/services/DrasiViewClient.cs`
 
 Already implemented with flexible URL resolution:
+
 - Reads `DRASI_VIEW_SERVICE_BASE_URL` environment variable
 - Falls back to Kubernetes DNS if not set
 
@@ -62,6 +66,7 @@ kubectl get svc -n drasi-system default-view-svc-public
 ```
 
 Expected output:
+
 ```
 NAME                       TYPE           EXTERNAL-IP      PORT(S)        AGE
 default-view-svc-public    LoadBalancer   20.x.x.x         80:30XXX/TCP   2m
@@ -97,6 +102,7 @@ https://<your-app>.azurestaticapps.net/
 ```
 
 Navigate to dashboard - you should see:
+
 - 📊 DRASI INSIGHTS panel with live statistics
 - 🔥 TRENDING ITEMS section populated
 - ⚠️ DUPLICATE REQUESTS section showing duplicates
@@ -173,8 +179,8 @@ az containerapp show \
 
 ## Cost
 
-**Azure LoadBalancer**: ~$18/month (Standard SKU)  
-**Public IP**: ~$3/month  
+**Azure LoadBalancer**: ~$18/month (Standard SKU)
+**Public IP**: ~$3/month
 **Total Additional Cost**: ~$21/month
 
 This is automatically included when you deploy with `azd up`.
@@ -188,6 +194,7 @@ This is automatically included when you deploy with `azd up`.
 **For Demos/Development**: This is the recommended approach - simple and automatic.
 
 **For Production**: Consider:
+
 1. Add Network Security Group rules to restrict source IPs
 2. Use VNet peering (see `drasi/VNET-INTEGRATION.md`)
 3. Add API Gateway with authentication
@@ -226,6 +233,7 @@ kubectl describe svc -n drasi-system default-view-svc-public
 ```
 
 **Common causes**:
+
 - Azure subscription quota limit for public IPs
 - AKS networking configuration issue
 
@@ -265,12 +273,14 @@ kubectl run test-curl --rm -it --image=curlimages/curl -- curl http://default-vi
 ### Issue: Frontend still shows "No data available"
 
 1. **Check API endpoint**:
+
    ```bash
    curl $API_URL/api/v1/drasi/insights
    # Should return populated arrays
    ```
 
 2. **Check browser DevTools**:
+
    - Open Console tab
    - Look for API errors
    - Check Network tab for failed requests
@@ -305,13 +315,14 @@ az containerapp update \
 
 ## Summary
 
-✅ **Automated**: Everything configured by `azd up`  
-✅ **Simple**: No manual steps required  
-✅ **Fast**: Working integration in ~10 minutes (Azure deployment time)  
-✅ **Verified**: API logs show successful Drasi queries  
+✅ **Automated**: Everything configured by `azd up`
+✅ **Simple**: No manual steps required
+✅ **Fast**: Working integration in ~10 minutes (Azure deployment time)
+✅ **Verified**: API logs show successful Drasi queries
 ✅ **Production-Ready**: Can migrate to VNet later without code changes
 
 **Next Steps**:
+
 1. Run `azd up`
 2. Wait for deployment to complete
 3. Test frontend dashboard
@@ -322,5 +333,5 @@ az containerapp update \
 
 **Need Help?** See `drasi/SIMPLE-PUBLIC-ENDPOINT.md` for detailed troubleshooting and manual setup instructions.
 
-**Last Updated**: 2025-11-24  
+**Last Updated**: 2025-11-24
 **Status**: ✅ Production ready (automated deployment)

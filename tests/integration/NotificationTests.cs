@@ -14,7 +14,6 @@ public class NotificationTests
     [Fact]
     public async Task RecommendationGeneration_CreatesNotification()
     {
-        // Arrange
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
@@ -35,11 +34,7 @@ public class NotificationTests
 
         await app.StartAsync();
         var client = app.GetTestServer().CreateClient();
-
-        // Act
         var response = await client.PostAsync("/test/recommendation", null);
-
-        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var notification = await response.Content.ReadFromJsonAsync<NotificationDto>();
         Assert.NotNull(notification);
@@ -50,7 +45,6 @@ public class NotificationTests
     [Fact]
     public async Task LogisticsAssessment_InfeasibleItems_CreatesNotification()
     {
-        // Arrange
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
@@ -71,11 +65,7 @@ public class NotificationTests
 
         await app.StartAsync();
         var client = app.GetTestServer().CreateClient();
-
-        // Act
         var response = await client.PostAsync("/test/logistics", null);
-
-        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var notification = await response.Content.ReadFromJsonAsync<NotificationDto>();
         Assert.NotNull(notification);

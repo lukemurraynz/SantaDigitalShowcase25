@@ -14,7 +14,6 @@ public class AuditRetrievalTests
     [Fact]
     public async Task RationaleAudit_ReturnsStoredRationale()
     {
-        // Arrange
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
@@ -33,11 +32,7 @@ public class AuditRetrievalTests
 
         await app.StartAsync();
         var client = app.GetTestServer().CreateClient();
-
-        // Act
         var response = await client.GetAsync("/audit/rationale/child-001");
-
-        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<RationaleAuditResponse>();
         Assert.NotNull(result);
@@ -48,7 +43,6 @@ public class AuditRetrievalTests
     [Fact]
     public async Task AssessmentHistoryAudit_ReturnsTimestampedReasons()
     {
-        // Arrange
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
@@ -67,11 +61,7 @@ public class AuditRetrievalTests
 
         await app.StartAsync();
         var client = app.GetTestServer().CreateClient();
-
-        // Act
         var response = await client.GetAsync("/audit/assessments/child-001");
-
-        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<AssessmentHistoryResponse>();
         Assert.NotNull(result);

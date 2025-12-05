@@ -19,7 +19,7 @@ param openaiName string = toLower(format(
 param aksNodeCount int = 2
 
 @description('Model name to deploy for Azure OpenAI.')
-param openaiModelName string = 'gpt-4.1'
+param openaiModelName string = 'gpt-4o'
 
 @description('Optional explicit model version (empty = latest/default).')
 param openaiModelVersion string = ''
@@ -136,19 +136,8 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
 
 var logAnalyticsKeys = logAnalytics.listKeys()
 
-// VNet Peering disabled - Container Apps use public Drasi LoadBalancer IP
-// Removes HTTP 400 blocking issue with VNet-integrated external ingress
-// module vnetPeering './modules/vnet-peering.bicep' = {
-//   name: 'vnet-peering'
-//   params: {
-//     location: location
-//     namePrefix: namePrefix
-//     aksVnetName: 'aks-vnet-39325428' // AKS VNet in node resource group
-//     aksVnetResourceGroup: aks.outputs.nodeResourceGroup
-//   }
-// }
-
 // Container Apps managed environment WITHOUT VNet integration
+// VNet Peering disabled - Container Apps use public Drasi LoadBalancer IP to avoid HTTP 400 errors
 resource caEnv 'Microsoft.App/managedEnvironments@2025-07-01' = {
   name: toLower(format('{0}-cae', namePrefix))
   location: location
@@ -161,8 +150,6 @@ resource caEnv 'Microsoft.App/managedEnvironments@2025-07-01' = {
         sharedKey: logAnalyticsKeys.primarySharedKey
       }
     }
-    // vnetConfiguration removed - was blocking external ingress with HTTP 400
-    // API uses public Drasi LoadBalancer IP instead of VNet peering
   }
 }
 
@@ -191,12 +178,6 @@ module eh './modules/eventhub.bicep' = {
     hubName: ehHubName
   }
 }
-
-// Inline Event Hub role assignments removed; handled via eh-roleassignments modules below.
-
-// Role assignments to allow Drasi MI to access Event Hubs via managed identity at namespace scope
-// Assign Data Receiver and Data Owner roles to Drasi MI
-// Remove duplicate/invalid role assignment blocks; use existing resource-based scope assignments above
 
 @description('Container image to deploy for the API')
 param apiImage string
@@ -376,28 +357,11 @@ resource drasiIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11
   tags: resourceTags
 }
 
-// Federated identity credential mapping AKS service account -> user-assigned identity (workload identity)
-// Service account: drasi-sa in namespace drasi
-resource drasiFederatedCredential 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2024-11-30' = {
-  name: 'drasi-controller'
-  parent: drasiIdentity
-  properties: {
-    issuer: aks.outputs.aksOidcIssuer
-    // Updated namespace from 'drasi' to 'drasi-system' to match deployed Drasi workloads
-    subject: 'system:serviceaccount:drasi-system:drasi-sa'
-    audiences: ['api://AzureADTokenExchange']
-  }
-}
-
 // Federated identity credential for Event Hub source service account
 // Required per https://drasi.io/how-to-guides/configure-sources/configure-azure-eventhub-source/#aks-setup
-// Added dependsOn to prevent concurrent writes to the same managed identity
 resource drasiEventHubSourceFederatedCredential 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2024-11-30' = {
   name: 'drasi-eventhub-source'
   parent: drasiIdentity
-  dependsOn: [
-    drasiFederatedCredential
-  ]
   properties: {
     issuer: aks.outputs.aksOidcIssuer
     subject: 'system:serviceaccount:drasi-system:source.wishlist-eh'

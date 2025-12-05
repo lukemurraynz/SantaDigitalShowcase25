@@ -1,5 +1,8 @@
 import * as signalR from '@microsoft/signalr';
 import React from 'react';
+import { POLLING_CONFIG } from '../constants/polling';
+import { isBehaviorMessage } from '../utils/behaviorFilters';
+import { logger } from '../utils/logger';
 import { Panel, PanelHeader, StatusBadgeVariant, StreamItem, StreamList } from './shared';
 
 // Helper to check if a URL is an insecure HTTP endpoint
@@ -49,7 +52,7 @@ const getSignalRUrl = (): string => {
 
     // If on HTTPS and the URL is HTTP, fall through to safer options
     if (onSecurePage && isInsecureUrl(hubUrl)) {
-      console.warn('[DrasiSignalR] Skipping insecure VITE_SIGNALR_URL on HTTPS page:', hubUrl);
+      logger.warn('[DrasiSignalR] Skipping insecure VITE_SIGNALR_URL on HTTPS page:', hubUrl);
     } else {
       return hubUrl;
     }
@@ -61,7 +64,7 @@ const getSignalRUrl = (): string => {
 
     // If on HTTPS and the hub URL is HTTP, fall through to safer options
     if (onSecurePage && isInsecureUrl(hub)) {
-      console.warn('[DrasiSignalR] Skipping insecure window.__SIGNALR_HUB__ on HTTPS page:', hub);
+      logger.warn('[DrasiSignalR] Skipping insecure window.__SIGNALR_HUB__ on HTTPS page:', hub);
     } else {
       return hub;
     }
@@ -72,7 +75,7 @@ const getSignalRUrl = (): string => {
 };
 
 const SIGNALR_HUB_URL = getSignalRUrl();
-console.log('[DrasiSignalR] Hub URL:', SIGNALR_HUB_URL);
+logger.debug('[DrasiSignalR] Hub URL:', SIGNALR_HUB_URL);
 
 // Shared SignalR connection singleton
 let sharedConnection: signalR.HubConnection | null = null;
@@ -102,12 +105,12 @@ const getSharedConnection = async (): Promise<signalR.HubConnection> => {
 
     // Register hub info handler once
     sharedConnection.on('hub.info', (info: any) => {
-      console.log('[SignalR] Hub info:', info);
+      logger.debug('[SignalR] Hub info:', info);
     });
 
     // Handle reconnection
     sharedConnection.onreconnected(() => {
-      console.log('[SignalR] Reconnected, reloading queries...');
+      logger.info('[SignalR] Reconnected, reloading queries...');
       // Trigger reload for all active queries
       queryHandlers.forEach((_, queryId) => {
         // Queries will reload via their individual useEffect hooks
@@ -117,11 +120,11 @@ const getSharedConnection = async (): Promise<signalR.HubConnection> => {
 
   connectionPromise = sharedConnection.start()
     .then(() => {
-      console.log('[SignalR] Shared connection established');
+      logger.info('[SignalR] Shared connection established');
       connectionPromise = null;
     })
     .catch((err) => {
-      console.error('[SignalR] Connection error:', err);
+      logger.error('[SignalR] Connection error:', err);
       connectionPromise = null;
       throw err;
     });
@@ -202,17 +205,17 @@ function useSignalRQuery<T>(queryId: string, sortFn?: (item: T) => number) {
           return currentData;
         });
       } catch (err) {
-        console.error(`[SignalR ${queryId}] Update error:`, err);
+        logger.error(`[SignalR ${queryId}] Update error:`, err);
       }
     };
 
     const startConnection = async () => {
       try {
         const conn = await getSharedConnection();
-        
+
         // Register this query's handler FIRST so we don't miss events
         registerQueryHandler(queryId, handleUpdate);
-        
+
         // Set connection immediately so UI shows as connected
         setConnection(conn);
 
@@ -236,11 +239,11 @@ function useSignalRQuery<T>(queryId: string, sortFn?: (item: T) => number) {
             }
           },
           error: (err) => {
-            console.error(`[SignalR ${queryId}] Reload error:`, err);
+            logger.error(`[SignalR ${queryId}] Reload error:`, err);
           }
         });
       } catch (err) {
-        console.error(`[SignalR ${queryId}] Connection error:`, err);
+        logger.error(`[SignalR ${queryId}] Connection error:`, err);
       }
     };
 
@@ -309,21 +312,21 @@ export const DrasiSignalRPanel: React.FC = () => {
 
   // Fallback: Load data from REST API if SignalR hasn't received data yet
   const [restData, setRestData] = React.useState<any>(null);
-  
+
   React.useEffect(() => {
     const loadInitialData = async () => {
       try {
-        console.log('[DrasiSignalR] Fetching REST API data...');
+        logger.debug('[DrasiSignalR] Fetching REST API data...');
         const response = await fetch('/api/v1/drasi/insights');
         if (response.ok) {
           const data = await response.json();
-          console.log('[DrasiSignalR] REST API response:', {
+          logger.debug('[DrasiSignalR] REST API response:', {
             trending: data.trending?.length || 0,
             duplicates: data.duplicates?.length || 0,
             inactiveChildren: data.inactiveChildren?.length || 0,
             duplicatesSample: data.duplicates?.slice(0, 2)
           });
-          
+
           // Map backend field names to frontend interface names
           const mappedData = {
             trending: data.trending || [],
@@ -337,22 +340,22 @@ export const DrasiSignalRPanel: React.FC = () => {
               daysSinceLastEvent: c.lastEventDays || c.daysSinceLastEvent || 3
             }))
           };
-          
-          console.log('[DrasiSignalR] Mapped REST data:', {
+
+          logger.debug('[DrasiSignalR] Mapped REST data:', {
             duplicates: mappedData.duplicates.length,
             duplicatesSample: mappedData.duplicates.slice(0, 2)
           });
-          
+
           setRestData(mappedData);
         }
       } catch (err) {
-        console.error('[DrasiSignalR] Failed to load initial data:', err);
+        logger.error('[DrasiSignalR] Failed to load initial data:', err);
       }
     };
-    
-    // Load initial data immediately for fast display, then refresh every 30 seconds
+
+    // Load initial data immediately for fast display, then refresh periodically
     loadInitialData();
-    const interval = setInterval(loadInitialData, 30000);
+    const interval = setInterval(loadInitialData, POLLING_CONFIG.DRASI_INSIGHTS_INTERVAL_MS);
     return () => clearInterval(interval);
   }, []);
 
@@ -361,18 +364,7 @@ export const DrasiSignalRPanel: React.FC = () => {
     connected ? 'connected' : 'connecting';
 
   const badge = getConnectionBadge(connectionStatus);
-  
-  // Filter out behavior-related messages that shouldn't appear in wishlist sections
-  const behaviorKeywords = [
-    'behavior', 'behave', 'chores', 'naughty', 'nice list', 'improve', 
-    'BEHAVIOR REPORT', 'helpful', 'kind', 'better', 'try to', 'will continue'
-  ];
-  const isBehaviorMessage = (text: string) => {
-    if (!text) return false;
-    const lowerText = text.toLowerCase();
-    return behaviorKeywords.some(keyword => lowerText.includes(keyword.toLowerCase()));
-  };
-  
+
   // Use SignalR data if available, otherwise fall back to REST API data
   // IMPORTANT: Prefer SignalR when it has data, but show REST data as fallback
   // Don't switch from REST to SignalR empty arrays - wait for actual SignalR data
@@ -381,13 +373,13 @@ export const DrasiSignalRPanel: React.FC = () => {
   const rawInactiveItems = inactive.items.length > 0 ? inactive.items : (restData?.inactiveChildren || []);
 
   // Filter trending items to exclude behavior messages
-  const filteredTrendingItems = rawTrendingItems.filter((item: any) => 
+  const filteredTrendingItems = rawTrendingItems.filter((item: any) =>
     item.item && !isBehaviorMessage(item.item)
   );
 
   // Filter duplicate items to exclude behavior messages
   // If SignalR data filters to empty but REST has data, use REST as fallback
-  let filteredDuplicateItems = rawDuplicateItems.filter((item: any) => 
+  let filteredDuplicateItems = rawDuplicateItems.filter((item: any) =>
     item.item && !isBehaviorMessage(item.item)
   );
   if (filteredDuplicateItems.length === 0 && restData?.duplicates?.length > 0) {
@@ -395,22 +387,22 @@ export const DrasiSignalRPanel: React.FC = () => {
       item.item && !isBehaviorMessage(item.item)
     );
   }
-  
+
   // Inactive children - use filtered data
   const inactiveItems = rawInactiveItems;
-  
+
   // Debug logging
-  console.log('[DrasiSignalR] Data sources:', {
+  logger.debug('[DrasiSignalR] Data sources:', {
     trending: { signalr: trending.items.length, rest: restData?.trending?.length || 0, using: filteredTrendingItems.length },
     duplicates: { signalr: duplicates.items.length, rest: restData?.duplicates?.length || 0, using: filteredDuplicateItems.length },
     inactive: { signalr: inactive.items.length, rest: restData?.inactiveChildren?.length || 0, using: inactiveItems.length },
     connected: trending.connected || duplicates.connected
   });
-  
+
   // Behavior changes only come from SignalR (not in REST API)
   const behaviorItems = behaviors.items;
-  
-  console.log('[DrasiSignalR] Filtered duplicates:', {
+
+  logger.debug('[DrasiSignalR] Filtered duplicates:', {
     original: rawDuplicateItems.length,
     filtered: filteredDuplicateItems.length,
     sample: filteredDuplicateItems.slice(0, 3)

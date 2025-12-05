@@ -2,10 +2,16 @@
 
 ## What Was Built
 
-✅ **Fixed all compilation errors** in StreamingAgentService and MultiAgentOrchestrator  
-✅ **Implemented tool calling** - 6 AIFunction-decorated tools for real data access  
-✅ **Registered services** in DI container  
-✅ **Created 4 new API endpoints** for enhanced features  
+✅ **Fixed all compilation errors** in StreamingAgentService and MultiAgentOrchestrator
+✅ **Implemented tool calling** - 6 AIFunction-decorated tools for real data access
+✅ **Registered services** in DI container
+✅ **Created 4 new API endpoints** for enhanced features
+
+## Prerequisites
+
+- API running locally (`dotnet run --project src`) or deployed via `azd up`
+- For deployed instances, replace `localhost:8080` with your Container App URL
+- Azure OpenAI configured with deployment name
 
 ## Test It Right Now
 
@@ -24,6 +30,7 @@ curl -X POST "http://localhost:8080/api/v1/children/child-demo/recommendations/c
 ```
 
 **What happens:**
+
 1. BehaviorAnalyst calls `GetChildBehaviorHistory` tool → real data from Cosmos
 2. CreativeGiftElf calls `SearchGiftInventory` tool → actual inventory
 3. QualityReviewerElf calls `CheckBudgetConstraints` tool → validates pricing
@@ -46,6 +53,7 @@ curl -N "http://localhost:8080/api/v1/children/child-demo/recommendations/stream
 ```
 
 **What you'll see:**
+
 ```
 data: {"Type":"thought","Content":"Analyzing profile..."}
 data: {"Type":"text-delta","Content":"Based on "}
@@ -71,6 +79,7 @@ curl "http://localhost:8080/api/v1/agent-tools"
 ```
 
 **Tools you'll see:**
+
 - `GetChildBehaviorHistory` - Real profile data
 - `SearchGiftInventory` - Actual inventory with prices
 - `CheckBudgetConstraints` - Budget validation
@@ -103,6 +112,7 @@ curl -X POST "http://localhost:8080/api/v1/children/child-demo/letters/behavior"
 ```
 
 **What happens:**
+
 1. Creates letter with behavior update
 2. Triggers `NaughtyNiceEventHandler`
 3. Agents regenerate recommendations based on new status
@@ -112,19 +122,20 @@ curl -X POST "http://localhost:8080/api/v1/children/child-demo/letters/behavior"
 
 ## Key Files Created/Modified
 
-| File | What Changed |
-|------|-------------|
-| `src/services/AgentToolLibrary.cs` | ✨ **NEW** - 6 AIFunction tools for agents |
-| `src/services/MultiAgentOrchestrator.cs` | ✅ Fixed + added tool library integration |
-| `src/services/StreamingAgentService.cs` | ✅ Fixed + simulated streaming |
-| `src/services/EnhancedAgentApi.cs` | ✨ **NEW** - 4 API endpoints |
-| `src/Program.cs` | ✅ Registered new services |
+| File                                     | What Changed                               |
+| ---------------------------------------- | ------------------------------------------ |
+| `src/services/AgentToolLibrary.cs`       | ✨ **NEW** - 6 AIFunction tools for agents |
+| `src/services/MultiAgentOrchestrator.cs` | ✅ Fixed + added tool library integration  |
+| `src/services/StreamingAgentService.cs`  | ✅ Fixed + simulated streaming             |
+| `src/services/EnhancedAgentApi.cs`       | ✨ **NEW** - 4 API endpoints               |
+| `src/Program.cs`                         | ✅ Registered new services                 |
 
 ---
 
 ## What Makes This Special
 
 ### ⭐ Tool Calling (Function Calling)
+
 Agents access **real data** instead of hallucinating:
 
 ```csharp
@@ -137,6 +148,7 @@ GetChildBehaviorHistory("child-123") → Returns actual preferences from DB
 ```
 
 ### ⭐ Multi-Agent Collaboration
+
 Three specialists work together:
 
 ```
@@ -150,6 +162,7 @@ QualityReviewerElf: "Let me validate..." (calls budget tools)
 ```
 
 ### ⭐ Real-Time Streaming
+
 Users see agents "thinking" in real-time via SSE.
 
 ---
@@ -181,20 +194,26 @@ Multi-Agent Orchestrator
 ## Quick Troubleshooting
 
 ### Endpoint returns 404?
+
 Check that you added `.MapEnhancedAgentApi()` in Program.cs:
+
 ```csharp
 v1.MapEnhancedAgentApi();
 ```
 
 ### "Service not registered"?
+
 Verify DI registrations:
+
 ```csharp
 builder.Services.AddScoped<src.services.AgentToolLibrary>();
 builder.Services.AddScoped<src.services.IMultiAgentOrchestrator, src.services.MultiAgentOrchestrator>();
 ```
 
 ### Tools not being called?
+
 Check that tools are passed to `CreateAIAgent`:
+
 ```csharp
 _agent = _chatClient.CreateAIAgent(
     name: "...",
@@ -208,6 +227,7 @@ _agent = _chatClient.CreateAIAgent(
 ## Next: See Full Documentation
 
 For complete details, see:
+
 - **ENHANCED-AGENTS-IMPLEMENTATION.md** - Full technical documentation
 - **ENHANCEMENT-ROADMAP.md** - Future improvements (10 more features!)
 - **NAUGHTY-NICE-STORY.md** - Original naughty/nice feature
@@ -216,12 +236,12 @@ For complete details, see:
 
 ## 🎉 Success Criteria Met
 
-✅ All compilation errors fixed  
-✅ Tool calling implemented with 6 real data access tools  
-✅ Multi-agent orchestration working  
-✅ Streaming responses implemented  
-✅ 4 new API endpoints operational  
-✅ Services registered in DI  
-✅ Comprehensive documentation complete  
+✅ All compilation errors fixed
+✅ Tool calling implemented with 6 real data access tools
+✅ Multi-agent orchestration working
+✅ Streaming responses implemented
+✅ 4 new API endpoints operational
+✅ Services registered in DI
+✅ Comprehensive documentation complete
 
 **Status: READY TO TEST!** 🚀

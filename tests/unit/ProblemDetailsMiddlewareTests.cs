@@ -32,18 +32,13 @@ namespace UnitTests
         [InlineData("/hub/negotiate")]
         public async Task SignalR_Paths_Bypass_Middleware_And_Propagate_To_Handler(string path)
         {
-            // Arrange
             using var logger = new ListLogger<ProblemDetailsMiddleware>();
             bool nextCalled = false;
             RequestDelegate next = ctx => { nextCalled = true; return Task.CompletedTask; };
             var middleware = new ProblemDetailsMiddleware(next, logger);
             var context = new DefaultHttpContext();
             context.Request.Path = path;
-
-            // Act
             await middleware.InvokeAsync(context);
-
-            // Assert
             Assert.True(nextCalled, "Next delegate should be called for SignalR paths");
         }
 
@@ -52,7 +47,6 @@ namespace UnitTests
         [InlineData("/hub")]
         public async Task SignalR_Paths_Do_Not_Catch_Exceptions(string path)
         {
-            // Arrange
             using var logger = new ListLogger<ProblemDetailsMiddleware>();
             RequestDelegate next = ctx => throw new InvalidOperationException("SignalR error");
             var middleware = new ProblemDetailsMiddleware(next, logger);
@@ -66,18 +60,13 @@ namespace UnitTests
         [Fact]
         public async Task BadHttpRequestException_Returns_400_With_Problem_Details()
         {
-            // Arrange
             using var logger = new ListLogger<ProblemDetailsMiddleware>();
             RequestDelegate next = ctx => throw new BadHttpRequestException("Invalid request");
             var middleware = new ProblemDetailsMiddleware(next, logger);
             var context = new DefaultHttpContext();
             context.Request.Path = "/api/test";
             context.Response.Body = new MemoryStream();
-
-            // Act
             await middleware.InvokeAsync(context);
-
-            // Assert
             Assert.Equal(400, context.Response.StatusCode);
             Assert.Equal("application/problem+json", context.Response.ContentType);
             
@@ -94,18 +83,13 @@ namespace UnitTests
         [Fact]
         public async Task JsonException_Returns_400_With_Problem_Details()
         {
-            // Arrange
             using var logger = new ListLogger<ProblemDetailsMiddleware>();
             RequestDelegate next = ctx => throw new JsonException("Invalid JSON");
             var middleware = new ProblemDetailsMiddleware(next, logger);
             var context = new DefaultHttpContext();
             context.Request.Path = "/api/test";
             context.Response.Body = new MemoryStream();
-
-            // Act
             await middleware.InvokeAsync(context);
-
-            // Assert
             Assert.Equal(400, context.Response.StatusCode);
             Assert.Equal("application/problem+json", context.Response.ContentType);
             
@@ -122,18 +106,13 @@ namespace UnitTests
         [Fact]
         public async Task General_Exception_Returns_500_With_Generic_Message()
         {
-            // Arrange
             using var logger = new ListLogger<ProblemDetailsMiddleware>();
             RequestDelegate next = ctx => throw new InvalidOperationException("Sensitive error details");
             var middleware = new ProblemDetailsMiddleware(next, logger);
             var context = new DefaultHttpContext();
             context.Request.Path = "/api/test";
             context.Response.Body = new MemoryStream();
-
-            // Act
             await middleware.InvokeAsync(context);
-
-            // Assert
             Assert.Equal(500, context.Response.StatusCode);
             Assert.Equal("application/problem+json", context.Response.ContentType);
             
@@ -152,7 +131,6 @@ namespace UnitTests
         [Fact]
         public async Task OperationCanceledException_Is_Not_Caught()
         {
-            // Arrange
             using var logger = new ListLogger<ProblemDetailsMiddleware>();
             RequestDelegate next = ctx => throw new OperationCanceledException("Request cancelled");
             var middleware = new ProblemDetailsMiddleware(next, logger);
@@ -166,7 +144,6 @@ namespace UnitTests
         [Fact]
         public async Task HasStarted_Check_Prevents_Duplicate_Response()
         {
-            // Arrange
             using var logger = new ListLogger<ProblemDetailsMiddleware>();
             RequestDelegate next = ctx =>
             {
@@ -191,17 +168,12 @@ namespace UnitTests
         [Fact]
         public async Task Successful_Request_Passes_Through()
         {
-            // Arrange
             using var logger = new ListLogger<ProblemDetailsMiddleware>();
             RequestDelegate next = ctx => { ctx.Response.StatusCode = 204; return Task.CompletedTask; };
             var middleware = new ProblemDetailsMiddleware(next, logger);
             var context = new DefaultHttpContext();
             context.Request.Path = "/api/test";
-
-            // Act
             await middleware.InvokeAsync(context);
-
-            // Assert
             Assert.Equal(204, context.Response.StatusCode);
             Assert.Empty(logger.Entries);
         }

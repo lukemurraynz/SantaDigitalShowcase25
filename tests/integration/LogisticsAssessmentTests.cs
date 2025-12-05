@@ -14,7 +14,6 @@ public class LogisticsAssessmentTests
     [Fact]
     public async Task LogisticsAssessment_AllFeasible_ReturnsFeasibleStatus()
     {
-        // Arrange
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
@@ -54,11 +53,7 @@ public class LogisticsAssessmentTests
 
         await app.StartAsync();
         var client = app.GetTestServer().CreateClient();
-
-        // Act
         var response = await client.PostAsync("/children/test-child/logistics", null);
-
-        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var assessment = await response.Content.ReadFromJsonAsync<LogisticsAssessmentEntity>();
         Assert.NotNull(assessment);
@@ -69,7 +64,6 @@ public class LogisticsAssessmentTests
     [Fact]
     public async Task LogisticsAssessment_MixedFeasibility_ReturnsPartialStatus()
     {
-        // Arrange
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
@@ -109,11 +103,7 @@ public class LogisticsAssessmentTests
 
         await app.StartAsync();
         var client = app.GetTestServer().CreateClient();
-
-        // Act
         var response = await client.PostAsync("/children/test-child/logistics", null);
-
-        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var assessment = await response.Content.ReadFromJsonAsync<LogisticsAssessmentEntity>();
         Assert.NotNull(assessment);

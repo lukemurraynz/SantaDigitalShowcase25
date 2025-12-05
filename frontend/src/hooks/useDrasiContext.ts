@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import { POLLING_CONFIG } from "../constants/polling";
 import type { DrasiInsights } from "../types/drasi";
+import { logger } from "../utils/logger";
 
 const API_URL = (() => {
   // If running on Azure Container Apps or Static Web Apps, ALWAYS use relative URLs
   if (
     typeof window !== "undefined" &&
     (window.location.hostname.includes("azurestaticapps") ||
-     window.location.hostname.includes("azurecontainerapps"))
+      window.location.hostname.includes("azurecontainerapps"))
   ) {
     return "";
   }
@@ -31,7 +33,6 @@ export function useDrasiContext(childId?: string) {
 
   useEffect(() => {
     let consecutiveFailures = 0;
-    const MAX_FAILURES = 5;
 
     const fetchInsights = async () => {
       try {
@@ -42,15 +43,15 @@ export function useDrasiContext(childId?: string) {
           consecutiveFailures = 0; // Reset on success
         } else if (res.status >= 500) {
           consecutiveFailures++;
-          if (consecutiveFailures >= MAX_FAILURES) {
-            console.warn("Drasi insights: Too many failures, stopping polling");
+          if (consecutiveFailures >= POLLING_CONFIG.MAX_CONSECUTIVE_FAILURES) {
+            logger.warn("Drasi insights: Too many failures, stopping polling");
             clearInterval(interval);
           }
         }
       } catch {
         consecutiveFailures++;
-        if (consecutiveFailures >= MAX_FAILURES) {
-          console.warn("Drasi insights: Too many failures, stopping polling");
+        if (consecutiveFailures >= POLLING_CONFIG.MAX_CONSECUTIVE_FAILURES) {
+          logger.warn("Drasi insights: Too many failures, stopping polling");
           clearInterval(interval);
         }
       } finally {
@@ -59,7 +60,10 @@ export function useDrasiContext(childId?: string) {
     };
 
     fetchInsights();
-    const interval = setInterval(fetchInsights, 30000); // Refresh every 30s
+    const interval = setInterval(
+      fetchInsights,
+      POLLING_CONFIG.DRASI_INSIGHTS_INTERVAL_MS
+    ); // Refresh every 30s
     return () => clearInterval(interval);
   }, []);
 
@@ -133,9 +137,16 @@ Please provide recommendations based on both the live Drasi insights and the use
       if (childBehavior.length > 0) {
         lines.push(`\n🎅 BEHAVIOR STATUS FOR CHILD ${focusChildId}:`);
         childBehavior.forEach((b) => {
-          const emoji = b.newStatus === "Nice" ? "😇" : b.newStatus === "Naughty" ? "😈" : "❓";
+          const emoji =
+            b.newStatus === "Nice"
+              ? "😇"
+              : b.newStatus === "Naughty"
+              ? "😈"
+              : "❓";
           const arrow = b.oldStatus === "Nice" ? "📉" : "📈";
-          lines.push(`   ${emoji} Status changed: ${b.oldStatus} → ${b.newStatus} ${arrow}`);
+          lines.push(
+            `   ${emoji} Status changed: ${b.oldStatus} → ${b.newStatus} ${arrow}`
+          );
           if (b.reason) {
             lines.push(`      Reason: ${b.reason}`);
           }
@@ -151,7 +162,12 @@ Please provide recommendations based on both the live Drasi insights and the use
       );
       const recentChanges = insights.behaviorChanges.slice(0, 3);
       recentChanges.forEach((b) => {
-        const emoji = b.newStatus === "Nice" ? "😇" : b.newStatus === "Naughty" ? "😈" : "❓";
+        const emoji =
+          b.newStatus === "Nice"
+            ? "😇"
+            : b.newStatus === "Naughty"
+            ? "😈"
+            : "❓";
         lines.push(`   ${emoji} ${b.childId}: ${b.oldStatus} → ${b.newStatus}`);
       });
     }

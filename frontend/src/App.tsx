@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { getReport, getNotifications, NotificationDto } from './agentClient';
-import { SantaView } from './pages/SantaView';
+import { getNotifications, getReport, NotificationDto } from './agentClient';
 import { ElfView } from './pages/ElfView';
+import { SantaView } from './pages/SantaView';
+import { logger } from './utils/logger';
 
 export const App: React.FC = () => {
   const [childIdInput, setChildIdInput] = useState('');
@@ -14,15 +15,15 @@ export const App: React.FC = () => {
 
   async function loadReport(id: string) {
     setReportLoading(true);
-    try { 
-      const meta = await getReport(id); 
-      setReportMeta(meta); 
+    try {
+      const meta = await getReport(id);
+      setReportMeta(meta);
       if (!meta) {
-        console.log(`No report found for ${id}. User may need to generate one.`);
+        logger.debug(`No report found for ${id}. User may need to generate one.`);
       }
-    } catch (err) { 
-      console.error('Failed to load report:', err);
-      setReportMeta(null); 
+    } catch (err) {
+      logger.error('Failed to load report:', err);
+      setReportMeta(null);
     } finally {
       setReportLoading(false);
     }

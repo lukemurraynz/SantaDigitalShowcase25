@@ -67,7 +67,6 @@ public class ProfileEnrichmentTests
     [Fact]
     public async Task ProfileEnrichment_WithSparseData_UsesFallback()
     {
-        // Arrange
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
@@ -101,8 +100,6 @@ public class ProfileEnrichmentTests
 
         await app.StartAsync();
         var client = app.GetTestServer().CreateClient();
-
-        // Act
         var response = await client.PostAsync("/children/sparse-child/profile", null);
 
         // Assert: Verify fallback was used

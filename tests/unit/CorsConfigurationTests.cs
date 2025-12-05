@@ -8,7 +8,6 @@ public class CorsConfigurationTests
     [Fact]
     public void CorsAllowedOrigins_FromJsonConfig_ReturnsConfiguredOrigins()
     {
-        // Arrange
         var config = new ConfigurationBuilder()
             .AddJsonFile("testappsettings.json", optional: true)
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -18,11 +17,7 @@ public class CorsConfigurationTests
                 ["Cors:AllowedOrigins:2"] = "http://localhost:8080"
             })
             .Build();
-
-        // Act
         var origins = config.GetSection("Cors:AllowedOrigins").Get<string[]>();
-
-        // Assert
         Assert.NotNull(origins);
         Assert.Equal(3, origins.Length);
         Assert.Contains("http://localhost:5173", origins);
@@ -33,15 +28,10 @@ public class CorsConfigurationTests
     [Fact]
     public void CorsAllowedOrigins_EmptyConfig_ReturnsEmptyArray()
     {
-        // Arrange
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>())
             .Build();
-
-        // Act
         var origins = config.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
-
-        // Assert
         Assert.Empty(origins);
     }
 
@@ -59,11 +49,7 @@ public class CorsConfigurationTests
                 ["Cors:AllowedOrigins:1"] = "https://custom.azurestaticapps.net"
             })
             .Build();
-
-        // Act
         var origins = config.GetSection("Cors:AllowedOrigins").Get<string[]>();
-
-        // Assert
         Assert.NotNull(origins);
         Assert.Equal(2, origins.Length);
         Assert.Contains("http://localhost:5173", origins);
