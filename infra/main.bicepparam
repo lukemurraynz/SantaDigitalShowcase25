@@ -2,7 +2,7 @@ using './main.bicep'
 
 // NOTE: env is automatically aligned with the current azd environment via azure.yaml parameters
 param env = readEnvironmentVariable('AZURE_ENV_NAME', 'dev')
-param project = 'drasicrhsith'
+param project = 'santadigitalshowcase'
 
 // ⚠️ BOOTSTRAP IMAGE - Temporary placeholder for initial infrastructure deployment
 // The actual application image will be built and deployed by 'azd deploy api'

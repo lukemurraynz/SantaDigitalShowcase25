@@ -17,7 +17,7 @@
     Azure resource group name where resources are deployed.
 
 .PARAMETER Project
-    Project name used in resource naming (e.g., 'santaworkshop').
+    Project name used in resource naming (e.g., 'santadigitalshowcase').
 
 .PARAMETER Env
     Environment name used in resource naming (e.g., 'dev', 'prod').
@@ -26,13 +26,13 @@
     Kubernetes namespace where Drasi is deployed (default: drasi-system).
 
 .EXAMPLE
-    .\validate-drasi-deployment.ps1 -ResourceGroup "rg-dev" -Project "santaworkshop" -Env "dev"
+    .\validate-drasi-deployment.ps1 -ResourceGroup "rg-dev" -Project "santadigitalshowcase" -Env "dev"
 
 .EXAMPLE
     # Get values from azd environment
     $rg = azd env get-value AZURE_RESOURCE_GROUP
     $env = azd env get-value AZURE_ENV_NAME
-    .\validate-drasi-deployment.ps1 -ResourceGroup $rg -Project "santaworkshop" -Env $env
+    .\validate-drasi-deployment.ps1 -ResourceGroup $rg -Project "santadigitalshowcase" -Env $env
 #>
 
 param(

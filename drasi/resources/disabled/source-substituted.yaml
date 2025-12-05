@@ -7,7 +7,7 @@ spec:
     kind: MicrosoftEntraWorkloadID
     clientId: e16183ab-275b-491b-bbaa-189282ce9c29
   properties:
-    host: santaworkshop-nks-eh.servicebus.windows.net
+    host: drasicrhsith-nks-eh.servicebus.windows.net
     eventHubs:
       - wishlist-events
     bootstrapWindow: 7200

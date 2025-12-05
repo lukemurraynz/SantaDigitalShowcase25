@@ -1,16 +1,16 @@
-# Documentation
+# 📚 Documentation Index
 
-This directory contains deployment guides and operational documentation for Santa's Digital Elves.
+This folder contains documentation for Santa's Digital Elves solution.
 
-## Available Guides
+## Guides
 
-| Document | Description |
-|----------|-------------|
-| [DRASI-TROUBLESHOOTING.md](DRASI-TROUBLESHOOTING.md) | Diagnose and fix Drasi integration issues |
-| [container-app-deployment-guide.md](container-app-deployment-guide.md) | Azure Container Apps configuration guide |
+- **[DRASI-TROUBLESHOOTING.md](./DRASI-TROUBLESHOOTING.md)** - Troubleshooting guide for Drasi deployment issues
+- **[guides/drasi-public-endpoint-setup.md](./guides/drasi-public-endpoint-setup.md)** - Setting up public endpoints for Drasi
+- **[guides/quickstart-naughty-nice.md](./guides/quickstart-naughty-nice.md)** - Quick start guide for the Naughty & Nice feature
+- **[guides/quickstart-enhanced-agents.md](./guides/quickstart-enhanced-agents.md)** - Quick start guide for AI agents
 
 ## Quick Links
 
-- [Main README](../README.md) - Getting started and deployment instructions
-- [Azure Developer CLI Documentation](https://learn.microsoft.com/azure/developer/azure-developer-cli/)
-- [Drasi Documentation](https://drasi.io/docs/)
+- [Main README](../README.md) - Project overview and getting started
+- [Drasi Documentation](https://drasi.io/docs/) - Official Drasi documentation
+- [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/) - Azure Container Apps documentation

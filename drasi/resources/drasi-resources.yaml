@@ -5,9 +5,9 @@ spec:
   kind: EventHub
   identity:
     kind: MicrosoftEntraWorkloadID
-    clientId: 788e6246-70d1-4e56-91d2-e8955b82b2a9
+    clientId: ${DRASI_CLIENT_ID}  # Update with your Managed Identity client ID
   properties:
-    host: santaworkshop-uhgsd-eh.servicebus.windows.net
+    host: ${EVENTHUB_NAMESPACE}.servicebus.windows.net  # Update with your Event Hub namespace
     eventHubs:
       - wishlist-events
       # Single hub to avoid alias mismatch during subscription

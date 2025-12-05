@@ -1,3 +1,4 @@
+using Azure;
 using Azure.Identity;
 using Drasicrhsit.Infrastructure;
 using Drasicrhsit.Services;
@@ -99,10 +100,11 @@ builder.Services.AddHttpClient<IDrasiViewClient, DrasiViewClient>(client => clie
         options.Retry.BackoffType = DelayBackoffType.Exponential;
         options.Retry.UseJitter = true;
 
-        options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(10);
+        options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(20);
 
         options.CircuitBreaker.FailureRatio = 0.5;
-        options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
+        // SamplingDuration must be at least 2x AttemptTimeout (20s * 2 = 40s minimum)
+        options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(45);
         options.CircuitBreaker.MinimumThroughput = 5;
         options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15);
     });
@@ -233,7 +235,17 @@ builder.Services.AddSingleton<AIAgent>(sp =>
         "AzureOpenAI:DeploymentName",
         "AZURE_OPENAI_DEPLOYMENT_NAME");
 
-    var azureClient = new Azure.AI.OpenAI.AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential());
+    // Prefer API Key if provided (for emergency workaround), otherwise use Managed Identity
+    var apiKey = cfg["AzureOpenAI:ApiKey"] ?? cfg["AZURE_OPENAI_API_KEY"];
+    Azure.AI.OpenAI.AzureOpenAIClient azureClient;
+    if (!string.IsNullOrEmpty(apiKey))
+    {
+        azureClient = new Azure.AI.OpenAI.AzureOpenAIClient(new Uri(endpoint), new Azure.AzureKeyCredential(apiKey));
+    }
+    else
+    {
+        azureClient = new Azure.AI.OpenAI.AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential());
+    }
     var chatClient = azureClient.GetChatClient(deploymentName).AsIChatClient();
     var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<ElfRecommendationAgentOptions>>().Value;
     var systemPrompt = options.SystemPromptOverride ?? ElfAgentPrompts.ElfRecommendationAgentSystemPrompt;
@@ -717,6 +729,7 @@ v1.MapPost("children/{childId}/wishlist-items", async (string childId, HttpReque
     IRecommendationRepository recRepo,
     INotificationRepository notifRepo,
     IEventPublisher eventPublisher,
+    IChildProfileService profileService,  // Added for behavior updates
     InMemoryIdempotencyStore idemStore,
     ILogger<Program> logger,
     CancellationToken ct) =>
@@ -750,6 +763,17 @@ v1.MapPost("children/{childId}/wishlist-items", async (string childId, HttpReque
     string? requestType = (string?)body["requestType"];
     string? statusChange = (string?)body["statusChange"];
 
+    // Support profile information for better AI recommendations
+    string? childName = (string?)body["childName"];
+    int? childAge = null;
+    try
+    {
+        var ageValue = body["childAge"];
+        if (ageValue != null)
+            childAge = (int?)ageValue;
+    }
+    catch { /* ignore parse issues */ }
+
     if (string.IsNullOrWhiteSpace(text))
     {
         logger.LogWarning("[WishlistItems] Missing text field for child {ChildId}", childId);
@@ -759,11 +783,12 @@ v1.MapPost("children/{childId}/wishlist-items", async (string childId, HttpReque
     // Validate that behavior-related text is not submitted as wishlist item
     // This prevents confusion where "needs to improve behavior" is treated as a gift request
     var behaviorKeywords = new[] { "behavior", "behaviour", "naughty", "nice", "improve", "BEHAVIOR REPORT" };
-    if (string.IsNullOrWhiteSpace(requestType) && behaviorKeywords.Any(keyword => 
+    if (string.IsNullOrWhiteSpace(requestType) && behaviorKeywords.Any(keyword =>
         text.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
     {
         logger.LogWarning("[WishlistItems] Behavior-related text detected without requestType for child {ChildId}: {Text}", childId, text);
-        return Results.BadRequest(new { 
+        return Results.BadRequest(new
+        {
             error = "Invalid wishlist item",
             detail = "This appears to be a behavior update, not a wishlist item. Use the /api/v1/children/{childId}/letters/behavior endpoint for behavior reports.",
             hint = "Wishlist items should be gift requests (toys, books, games), not behavior descriptions."
@@ -790,6 +815,22 @@ v1.MapPost("children/{childId}/wishlist-items", async (string childId, HttpReque
             var letter = await wishlist.AddLetterAsync(childId, requestType, text!, category, budgetEstimate, statusChange, ct);
             itemId = letter.Id;
             responseItem = new { Id = letter.Id, ItemName = letter.ItemName, Category = letter.Category, RequestType = letter.RequestType, StatusChange = letter.StatusChange };
+
+            // If this is a behavior update, also update the profile cache so recommendations reflect the new status
+            if (requestType == "behavior-update" && !string.IsNullOrWhiteSpace(statusChange))
+            {
+                var newStatus = statusChange.ToLowerInvariant() switch
+                {
+                    "nice" => NiceStatus.Nice,
+                    "naughty" => NiceStatus.Naughty,
+                    _ => (NiceStatus?)null
+                };
+                if (newStatus.HasValue)
+                {
+                    await profileService.UpdateStatusAsync(childId, newStatus.Value, ct);
+                    logger.LogInformation("[WishlistItems] Updated profile status for child {ChildId} to {Status}", childId, newStatus.Value);
+                }
+            }
         }
         else
         {
@@ -797,6 +838,27 @@ v1.MapPost("children/{childId}/wishlist-items", async (string childId, HttpReque
             var item = await wishlist.AddAsync(childId, text!, category, budgetEstimate, ct);
             itemId = item.Id;
             responseItem = new { Id = item.Id, ItemName = item.ItemName, Category = item.Category };
+
+            // Update child's profile with the wishlist item and any provided profile info for better recommendations
+            // The item text (and category if provided) become preferences the AI can use
+            var preferences = new List<string> { text! };
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                preferences.Add(category!);
+            }
+
+            // If name or age was provided, do a full upsert; otherwise just add preferences
+            if (!string.IsNullOrWhiteSpace(childName) || childAge.HasValue)
+            {
+                await profileService.UpsertProfileAsync(childId, childName, childAge, preferences, budgetEstimate.HasValue ? (decimal)budgetEstimate.Value : null, ct);
+                logger.LogInformation("[WishlistItems] Upserted profile for {ChildId}: Name={Name}, Age={Age}, Prefs=[{Prefs}]",
+                    childId, childName ?? "(not set)", childAge?.ToString() ?? "(not set)", string.Join(", ", preferences));
+            }
+            else
+            {
+                await profileService.AddPreferencesAsync(childId, preferences, ct);
+                logger.LogInformation("[WishlistItems] Added preferences for {ChildId}: [{Prefs}]", childId, string.Join(", ", preferences));
+            }
         }
     }
     catch (OperationCanceledException)

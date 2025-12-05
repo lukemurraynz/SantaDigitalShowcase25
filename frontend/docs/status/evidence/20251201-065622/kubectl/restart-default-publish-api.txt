@@ -1,2 +1,0 @@
-deployment.apps/default-publish-api restarted
-

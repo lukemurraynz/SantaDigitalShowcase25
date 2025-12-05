@@ -293,6 +293,7 @@ resource acrAcrPullAssignment 'Microsoft.Authorization/roleAssignments@2022-04-0
 }
 
 // Grant Cognitive Services OpenAI User on OpenAI account
+// Implicit dependency via api.outputs.principalId ensures identity is created first
 resource openaiUserAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(uniqueString(subscription().subscriptionId, openai.id, api.name, 'OpenAI'))
   scope: openai

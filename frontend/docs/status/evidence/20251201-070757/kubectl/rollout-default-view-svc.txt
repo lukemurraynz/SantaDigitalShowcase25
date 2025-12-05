@@ -1,3 +1,0 @@
-Waiting for deployment "default-view-svc" rollout to finish: 1 old replicas are pending termination...
-error: timed out waiting for the condition
-

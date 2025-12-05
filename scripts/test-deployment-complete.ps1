@@ -3,7 +3,7 @@
 .SYNOPSIS
     Comprehensive deployment verification and testing script
 .DESCRIPTION
-    Tests all components of the santaworkshop deployment after azd up completes
+    Tests all components of the santadigitalshowcase deployment after azd up completes
 #>
 
 param(

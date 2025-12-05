@@ -48,7 +48,9 @@ public class JobService : IJobService
         );
         await _events.AddAsync(evt, ct);
 
-        // Create job
+        // Create job in queued state
+        // PERFORMANCE: Processing now happens asynchronously via direct trigger in JobsApi
+        // This allows 202 response to return immediately without blocking
         var job = new Job(
             Id: dedupeKey,
             ChildId: childId,
@@ -60,41 +62,10 @@ public class JobService : IJobService
         );
         await _jobs.UpsertAsync(job, ct);
 
-        // Process pipeline (synchronously for demo)
-        try
-        {
-            var top = await _recs.GetTopNAsync(childId, topN: 3, ct);
-            var withRationale = new List<Recommendation>();
-            foreach (var r in top)
-            {
-                withRationale.Add(await _agent.AddRationaleAsync(r, ct));
-            }
-
-            var summary = await _agent.GetLabelExplanationAsync(childId, ct);
-            var label = "Nice"; // demo default
-            var path = await _generator.GenerateMarkdownAsync(childId, withRationale, label, summary, ct);
-
-            var report = new Report(
-                Id: Guid.NewGuid().ToString(),
-                ChildId: childId,
-                CreatedAt: DateTime.UtcNow,
-                Recommendations: withRationale,
-                Summary: summary,
-                Label: label,
-                Disclaimer: "Demo-only; synthetic data.",
-                Format: "markdown",
-                Path: path.Replace(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..")) + Path.DirectorySeparatorChar, string.Empty)
-            );
-            await _reports.UpsertAsync(report, ct);
-
-            var succeeded = job with { Status = "succeeded", UpdatedAt = DateTime.UtcNow };
-            await _jobs.UpsertAsync(succeeded, ct);
-        }
-        catch (Exception ex)
-        {
-            var failed = job with { Status = "failed", UpdatedAt = DateTime.UtcNow, Error = ex.Message };
-            await _jobs.UpsertAsync(failed, ct);
-        }
+        // Note: Actual recommendation generation happens via:
+        // 1. Direct trigger (JobsApi.cs Task.Run) - immediate, bypasses Drasi delay
+        // 2. Drasi reaction (OrchestratorApi.cs) - triggered by event graph query
+        // Both paths are deduplicated by ElfAgentOrchestrator to prevent duplicate work
 
         return true;
     }

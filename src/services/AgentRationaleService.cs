@@ -14,22 +14,40 @@ public interface IAgentRationaleService
 public partial class AgentRationaleService : IAgentRationaleService
 {
     private readonly AIAgent _agent;
+    private readonly IChildProfileService _profileService;
     private readonly ILogger<AgentRationaleService> _logger;
 
-    public AgentRationaleService(AIAgent agent, ILogger<AgentRationaleService> logger)
+    public AgentRationaleService(AIAgent agent, IChildProfileService profileService, ILogger<AgentRationaleService> logger)
     {
         _agent = agent ?? throw new ArgumentNullException(nameof(agent));
+        _profileService = profileService ?? throw new ArgumentNullException(nameof(profileService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<Recommendation> AddRationaleAsync(Recommendation rec, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(rec);
+
+        // Fetch profile to include in rationale prompt for context
+        var profile = await _profileService.GetChildProfileAsync(rec.ChildId, ct);
+        string preferences = profile?.Preferences is { Length: > 0 }
+            ? string.Join(", ", profile.Preferences)
+            : "not specified";
+        string age = profile?.Age?.ToString() ?? "not specified";
+        string name = profile?.Name ?? "not specified";
+
         string prompt = $"""
 ChildId: {rec.ChildId}
+Child Name: {name}
+Age: {age}
+Stated Preferences/Wishlist: {preferences}
 Suggestion: {rec.Suggestion}
 
-You are the Elf Recommendation Agent. Produce a short, honest rationale (1-3 sentences) explaining why this suggestion is a good match for the child, referencing age, interests, and constraints when known. Do not invent personal details that were not provided.
+You are the Elf Recommendation Agent. Produce a short, enthusiastic rationale (1-2 sentences) explaining why this suggestion is a PERFECT match for this child!
+
+If the suggestion matches something from their wishlist/preferences, mention that directly (e.g., "You asked for an Xbox, and this Xbox Series X is exactly what you wanted!").
+If it's a related accessory or complementary item, explain the connection (e.g., "Since you love gaming, this Xbox Game Pass will give you access to hundreds of games!").
+Keep it fun, festive, and personalized. This is Santa's Workshop!
 """;
         try
         {
@@ -44,7 +62,7 @@ You are the Elf Recommendation Agent. Produce a short, honest rationale (1-3 sen
             var text = run?.ToString()?.Trim();
             if (string.IsNullOrWhiteSpace(text))
             {
-                text = GetFallback(rec.ChildId, rec.Suggestion);
+                text = GetFallback(rec.ChildId, rec.Suggestion, preferences);
             }
             return rec with { Rationale = text };
         }
@@ -52,7 +70,7 @@ You are the Elf Recommendation Agent. Produce a short, honest rationale (1-3 sen
         {
             // Timeout occurred (not user cancellation) - use fallback
             _logger.LogWarning("Rationale generation timed out for {ChildId}, using fallback", rec.ChildId);
-            return rec with { Rationale = GetFallback(rec.ChildId, rec.Suggestion) };
+            return rec with { Rationale = GetFallback(rec.ChildId, rec.Suggestion, preferences) };
         }
         catch (OperationCanceledException)
         {
@@ -63,7 +81,7 @@ You are the Elf Recommendation Agent. Produce a short, honest rationale (1-3 sen
         {
             // Catch ALL other exceptions and use fallback to ensure the API doesn't fail
             Log_RationaleGenerationFailed(_logger, ex);
-            return rec with { Rationale = GetFallback(rec.ChildId, rec.Suggestion) };
+            return rec with { Rationale = GetFallback(rec.ChildId, rec.Suggestion, preferences) };
         }
     }
 
@@ -74,7 +92,14 @@ You are the Elf Recommendation Agent. Produce a short, honest rationale (1-3 sen
         return Task.FromResult("Behavior assessed from events: status being monitored. Keep up the festive spirit!");
     }
 
-    private static string GetFallback(string childId, string suggestion) => $"Recommended '{suggestion}' for child '{childId}' based on their profile and letter to the North Pole.";
+    private static string GetFallback(string childId, string suggestion, string preferences)
+    {
+        if (preferences != "not specified" && preferences.Length > 0)
+        {
+            return $"🎁 '{suggestion}' is a great choice based on your interests in {preferences}! Santa's elves picked this just for you.";
+        }
+        return $"🎁 Santa's elves recommend '{suggestion}' - it's perfect for your wishlist!";
+    }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Rationale generation failed; using fallback")]
     private static partial void Log_RationaleGenerationFailed(ILogger logger, Exception ex);

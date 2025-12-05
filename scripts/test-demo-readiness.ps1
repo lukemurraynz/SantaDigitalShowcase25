@@ -135,7 +135,7 @@ if ($resourceGroup) {
     # Get Container App name from azd or construct it
     $envName = azd env get-value AZURE_ENV_NAME 2>$null
     if ($envName) {
-        $containerAppName = "santaworkshop-$envName-api"
+        $containerAppName = "santadigitalshowcase-$envName-api"
 
         # Check if Container App exists and validate configuration
         try {

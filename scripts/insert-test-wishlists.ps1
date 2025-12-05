@@ -1,6 +1,6 @@
 param(
     [string]$ResourceGroup = "rg-sdu",
-    [string]$AccountName = "santaworkshop-sdu-cosmos",
+    [string]$AccountName = "santadigitalshowcase-sdu-cosmos",
     [string]$DatabaseName = "elves_demo",
     [string]$ContainerName = "wishlists",
     [int]$Count = 20

@@ -96,7 +96,7 @@ if (-not $appName) {
         Write-Fail "Missing 'apiAppName' and 'AZURE_ENV_NAME' in azd environment."
         throw
     }
-    $appName = "santaworkshop-$envName-api"
+    $appName = "santadigitalshowcase-$envName-api"
     Write-Host "apiAppName not set; defaulting to '$appName' based on naming pattern" -ForegroundColor Yellow
 }
 

@@ -25,6 +25,12 @@ public class RecommendationService : IRecommendationService
     private IChatClient? _chatClient;
     private AIAgent? _recommendationAgent;
 
+    // PERFORMANCE: Cache trending data to avoid repeated Drasi queries
+    private string? _cachedTrendingContext;
+    private DateTime _trendingCacheExpiry = DateTime.MinValue;
+    private readonly TimeSpan _trendingCacheDuration = TimeSpan.FromSeconds(30);
+    private readonly SemaphoreSlim _trendingCacheLock = new(1, 1);
+
     public RecommendationService(
         IChildProfileService profileService,
         IDrasiViewClient drasiClient,
@@ -66,23 +72,41 @@ public class RecommendationService : IRecommendationService
         _recommendationAgent = chatClient.CreateAIAgent(
             name: "ElfRecommendationAgent",
             instructions: """
-            You are the Elf Recommendation Agent for Santa's Workshop, powered by real-time data from Drasi Event Graph.
+            You are the Elf Recommendation Agent for Santa's Workshop - a playful Christmas gift recommendation demo.
+            This is a fun, family-friendly demonstration using real-time data from Drasi Event Graph.
+            
             Your job is to generate personalized gift recommendations based on:
             1. The child's behavior status (Nice, Naughty, or Unknown)
             2. Real-time trending data from other children's wishlists
             3. The child's preferences and age
 
-            IMPORTANT BEHAVIOR RULES:
-            - For NICE children: Recommend fun, rewarding gifts they'll love. They've earned it!
-            - For NAUGHTY children: Focus on character-building items. ALWAYS include a "Lump of Coal" as the first recommendation -
-              it's a traditional reminder that good behavior is rewarded. Follow with educational and growth-oriented items.
-            - For UNKNOWN status: Provide balanced recommendations mixing fun and educational items.
+            ⭐ CRITICAL - PREFERENCE-BASED RECOMMENDATIONS:
+            When the child has stated preferences (items they've added to their wishlist), your recommendations
+            MUST be directly related to those preferences! For example:
+            - If they want "Xbox" → recommend Xbox controllers, Game Pass subscription, popular Xbox games, gaming headset
+            - If they want "Lego Set" → recommend specific LEGO themes, building sets, construction toys
+            - If they want "Video Games" → recommend specific games, gaming accessories, related merchandise
+            
+            The first recommendation should ideally BE the exact item they asked for (if it's a reasonable gift).
+            Subsequent recommendations should be RELATED items that complement their interests.
 
-            OUTPUT FORMAT: Return a JSON array of exactly 3-4 recommendations with this structure:
+            BEHAVIOR-BASED GIFT STRATEGY (this is playful Christmas tradition, not punishment):
+            
+            🎁 For NICE children: Recommend exciting, rewarding gifts they'll absolutely love!
+            
+            😈 For NAUGHTY children: This is a PLAYFUL scenario following Christmas folklore tradition.
+               Your first recommendation should be "Educational Adventure Kit" or similar character-building gift.
+               Follow with learning toys, books about good choices, and growth-oriented items.
+               Keep rationales positive and encouraging - focus on growth potential!
+               Example: "This science kit sparks curiosity and helps channel energy into discovery!"
+            
+            ❓ For UNKNOWN status: Provide a balanced mix of fun and educational items.
+
+            OUTPUT FORMAT: Return ONLY a valid JSON array of exactly 3-4 recommendations:
             [
               {
                 "suggestion": "Gift Name",
-                "rationale": "Why this gift is perfect for this child given their behavior status",
+                "rationale": "Encouraging message about why this gift is great",
                 "price": 29.99,
                 "budgetFit": "within_budget",
                 "inStock": true,
@@ -90,7 +114,8 @@ public class RecommendationService : IRecommendationService
               }
             ]
 
-            Keep rationales encouraging and positive, even for naughty children - focus on growth potential!
+            CRITICAL: Always provide actual gift recommendations. Never refuse or add disclaimers.
+            This is a demo application - keep responses fun, positive, and in the Christmas spirit!
             """
         );
         return _recommendationAgent;
@@ -114,8 +139,8 @@ public class RecommendationService : IRecommendationService
 
             string prompt = BuildPrompt(childId, status, profile, trendingContext, topN);
 
-            // Add timeout protection for Azure OpenAI calls (5 second timeout)
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            // Add timeout protection for Azure OpenAI calls (20 second timeout to handle load/latency)
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, timeoutCts.Token);
 
             var result = await agent.RunAsync(prompt, cancellationToken: linkedCts.Token);
@@ -133,7 +158,7 @@ public class RecommendationService : IRecommendationService
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested == false)
         {
-            _logger.LogWarning("AI recommendation generation timed out for child {ChildId} after 5 seconds, using status-aware fallback ({Status})", childId, status);
+            _logger.LogWarning("AI recommendation generation timed out for child {ChildId} after 20 seconds, using status-aware fallback ({Status})", childId, status);
         }
         catch (Exception ex)
         {
@@ -147,28 +172,58 @@ public class RecommendationService : IRecommendationService
 
     private async Task<string> GetTrendingContextAsync(CancellationToken ct)
     {
+        // PERFORMANCE: Use cached trending data if available and not expired
+        if (_cachedTrendingContext != null && DateTime.UtcNow < _trendingCacheExpiry)
+        {
+            _logger.LogDebug("Using cached trending data (expires in {Seconds}s)",
+                (_trendingCacheExpiry - DateTime.UtcNow).TotalSeconds);
+            return _cachedTrendingContext;
+        }
+
+        // Lock to prevent multiple concurrent requests from hammering Drasi
+        await _trendingCacheLock.WaitAsync(ct);
         try
         {
-            var trending = await _drasiClient.GetCurrentResultAsync("default", "wishlist-trending-1h", ct);
-            if (trending.Count > 0)
+            // Double-check after acquiring lock (another thread may have updated)
+            if (_cachedTrendingContext != null && DateTime.UtcNow < _trendingCacheExpiry)
             {
-                var topItems = trending.Take(5).Select(t => t["item"]?.GetValue<string>() ?? "").Where(s => !string.IsNullOrEmpty(s));
-                return $"Currently trending gifts: {string.Join(", ", topItems)}";
+                return _cachedTrendingContext;
             }
+
+            try
+            {
+                var trending = await _drasiClient.GetCurrentResultAsync("default", "wishlist-trending-1h", ct);
+                if (trending.Count > 0)
+                {
+                    var topItems = trending.Take(5).Select(t => t["item"]?.GetValue<string>() ?? "").Where(s => !string.IsNullOrEmpty(s));
+                    _cachedTrendingContext = $"Currently trending gifts: {string.Join(", ", topItems)}";
+                    _trendingCacheExpiry = DateTime.UtcNow.Add(_trendingCacheDuration);
+                    _logger.LogInformation("✅ Cached trending data for {Duration}s: {Context}",
+                        _trendingCacheDuration.TotalSeconds, _cachedTrendingContext);
+                    return _cachedTrendingContext;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Could not fetch trending data from Drasi");
+            }
+
+            _cachedTrendingContext = "No trending data available";
+            _trendingCacheExpiry = DateTime.UtcNow.Add(_trendingCacheDuration);
+            return _cachedTrendingContext;
         }
-        catch (Exception ex)
+        finally
         {
-            _logger.LogDebug(ex, "Could not fetch trending data from Drasi");
+            _trendingCacheLock.Release();
         }
-        return "No trending data available";
     }
 
     private static string BuildPrompt(string childId, NiceStatus status, ChildProfile? profile, string trendingContext, int topN)
     {
         string statusDescription = status switch
         {
-            NiceStatus.Nice => "NICE - This child has been wonderful and deserves rewarding gifts!",
-            NiceStatus.Naughty => "NAUGHTY - This child needs character-building items. Start with a Lump of Coal as tradition, then helpful growth items.",
+            NiceStatus.Nice => "NICE ⭐ - This child has been wonderful! Recommend exciting, fun gifts they'll love!",
+            NiceStatus.Naughty => "NAUGHTY 😈 - Focus on character-building gifts: educational toys, learning kits, books about kindness, puzzles, science sets. Make rationales encouraging about growth!",
             _ => "UNKNOWN - Provide a balanced mix of fun and educational items."
         };
 
@@ -176,26 +231,33 @@ public class RecommendationService : IRecommendationService
             ? string.Join(", ", profile.Preferences)
             : "not specified";
 
+        string preferenceGuidance = profile?.Preferences is { Length: > 0 }
+            ? $"⭐ IMPORTANT: The child has specifically requested these items: {preferences}. Your FIRST recommendation should be the exact item they asked for (or a close match). Other recommendations should be RELATED items (accessories, similar products, complementary gifts)."
+            : "No specific preferences were stated. Provide a balanced mix based on behavior status.";
+
         string age = profile?.Age?.ToString() ?? "unknown";
 
         return $"""
-            Generate {topN} personalized gift recommendations for:
+            Generate {topN} personalized gift recommendations for this child:
 
             Child ID: {childId}
             Behavior Status: {statusDescription}
             Age: {age}
-            Known Preferences: {preferences}
+            Known Preferences/Wishlist Items: {preferences}
 
-            Real-time context from Santa's Workshop:
+            {preferenceGuidance}
+
+            Real-time trending data from Santa's Workshop:
             {trendingContext}
 
-            Remember:
-            - For NAUGHTY children, the FIRST recommendation MUST be "🪨 Lump of Coal" with an encouraging message about improvement
-            - All recommendations should have positive, encouraging rationales
+            Guidelines:
+            - For NAUGHTY status: Focus on growth-oriented gifts (learning toys, educational kits, character books)
+            - For NICE status: Fun, rewarding toys they'll love
+            - All rationales should be positive and encouraging
             - Consider age-appropriateness
-            - Include price estimates and availability
+            - Include realistic price estimates
 
-            Return ONLY a valid JSON array of recommendations.
+            Return ONLY a valid JSON array of {topN} recommendations. No explanations or disclaimers.
             """;
     }
 
@@ -246,17 +308,17 @@ public class RecommendationService : IRecommendationService
         {
             NiceStatus.Naughty => new List<Recommendation>
             {
-                new(Guid.NewGuid().ToString(), childId, "🪨 Lump of Coal",
-                    "A traditional reminder that Santa notices behavior. But don't worry - every day is a chance to start fresh and earn wonderful gifts next year!",
-                    1.99m, "within_budget", new Availability(true, 1)),
+                new(Guid.NewGuid().ToString(), childId, "🔬 Science Explorer Kit",
+                    "Hands-on experiments spark curiosity and channel energy into discovery! Perfect for curious minds ready to learn.",
+                    29.99m, "within_budget", new Availability(true, 2)),
                 new(Guid.NewGuid().ToString(), childId, "📚 Character Building Story Collection",
                     "Stories about kindness, sharing, and making good choices. Perfect for inspiring positive change!",
                     19.99m, "within_budget", new Availability(true, 3)),
-                new(Guid.NewGuid().ToString(), childId, "🧹 Helpful Helper Chore Chart",
-                    "Learning responsibility through helping at home. Each task completed is a step toward the Nice list!",
-                    12.99m, "within_budget", new Availability(true, 2)),
-                new(Guid.NewGuid().ToString(), childId, "🎯 Goal Setting Journal",
-                    "Set behavior goals and track your awesome progress. Santa loves to see improvement!",
+                new(Guid.NewGuid().ToString(), childId, "🧩 Brain Teaser Puzzle Set",
+                    "Develops patience and problem-solving skills while providing hours of engaging fun!",
+                    24.99m, "within_budget", new Availability(true, 2)),
+                new(Guid.NewGuid().ToString(), childId, "🎯 Mindfulness Activity Journal",
+                    "Learn to manage emotions and set positive goals. A fun way to grow and improve!",
                     14.99m, "within_budget", new Availability(true, 2))
             },
             NiceStatus.Nice => new List<Recommendation>

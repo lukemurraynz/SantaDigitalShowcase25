@@ -12,10 +12,10 @@
   - Updates Dapr component `cosmos-state` to use `azureClientId` (no key)
 
 .PARAMETER ResourceGroup
-  Azure resource group name (e.g., santaworkshop-ae1-rg)
+  Azure resource group name (e.g., santadigitalshowcase-ae1-rg)
 
 .PARAMETER Project
-  Project short name (e.g., santaworkshop)
+  Project short name (e.g., santadigitalshowcase)
 
 .PARAMETER Env
   Environment name (e.g., ae1)
@@ -24,7 +24,7 @@
   Kubernetes namespace (default: drasi-system)
 
 .EXAMPLE
-  ./scripts/enable-cosmos-managed-identity.ps1 -ResourceGroup santaworkshop-ae1-rg -Project santaworkshop -Env ae1
+  ./scripts/enable-cosmos-managed-identity.ps1 -ResourceGroup santadigitalshowcase-ae1-rg -Project santadigitalshowcase -Env ae1
 #>
 
 param(

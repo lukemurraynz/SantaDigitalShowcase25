@@ -1,2 +1,0 @@
-error: deployment "default-query-host" exceeded its progress deadline
-

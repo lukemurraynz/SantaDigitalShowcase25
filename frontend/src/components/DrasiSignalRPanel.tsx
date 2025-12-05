@@ -280,6 +280,8 @@ interface InactiveChild {
   lastEvent: string;
   daysSinceLastEvent: number;
 }
+// Note: InactiveChild represents children who have "grown up" (no activity for 3+ days)
+// This is displayed as "All Grown Up!" in the UI for the festive demo theme
 
 interface BehaviorChange {
   childId: string;
@@ -360,44 +362,56 @@ export const DrasiSignalRPanel: React.FC = () => {
 
   const badge = getConnectionBadge(connectionStatus);
   
+  // Filter out behavior-related messages that shouldn't appear in wishlist sections
+  const behaviorKeywords = [
+    'behavior', 'behave', 'chores', 'naughty', 'nice list', 'improve', 
+    'BEHAVIOR REPORT', 'helpful', 'kind', 'better', 'try to', 'will continue'
+  ];
+  const isBehaviorMessage = (text: string) => {
+    if (!text) return false;
+    const lowerText = text.toLowerCase();
+    return behaviorKeywords.some(keyword => lowerText.includes(keyword.toLowerCase()));
+  };
+  
   // Use SignalR data if available, otherwise fall back to REST API data
   // IMPORTANT: Prefer SignalR when it has data, but show REST data as fallback
   // Don't switch from REST to SignalR empty arrays - wait for actual SignalR data
-  const trendingItems = trending.items.length > 0 ? trending.items : (restData?.trending || []);
-  const duplicateItems = duplicates.items.length > 0 ? duplicates.items : (restData?.duplicates || []);
-  const inactiveItems = inactive.items.length > 0 ? inactive.items : (restData?.inactiveChildren || []);
+  const rawTrendingItems = trending.items.length > 0 ? trending.items : (restData?.trending || []);
+  const rawDuplicateItems = duplicates.items.length > 0 ? duplicates.items : (restData?.duplicates || []);
+  const rawInactiveItems = inactive.items.length > 0 ? inactive.items : (restData?.inactiveChildren || []);
+
+  // Filter trending items to exclude behavior messages
+  const filteredTrendingItems = rawTrendingItems.filter((item: any) => 
+    item.item && !isBehaviorMessage(item.item)
+  );
+
+  // Filter duplicate items to exclude behavior messages
+  // If SignalR data filters to empty but REST has data, use REST as fallback
+  let filteredDuplicateItems = rawDuplicateItems.filter((item: any) => 
+    item.item && !isBehaviorMessage(item.item)
+  );
+  if (filteredDuplicateItems.length === 0 && restData?.duplicates?.length > 0) {
+    filteredDuplicateItems = (restData.duplicates || []).filter((item: any) =>
+      item.item && !isBehaviorMessage(item.item)
+    );
+  }
+  
+  // Inactive children - use filtered data
+  const inactiveItems = rawInactiveItems;
   
   // Debug logging
   console.log('[DrasiSignalR] Data sources:', {
-    trending: { signalr: trending.items.length, rest: restData?.trending?.length || 0, using: trendingItems.length },
-    duplicates: { signalr: duplicates.items.length, rest: restData?.duplicates?.length || 0, using: duplicateItems.length },
+    trending: { signalr: trending.items.length, rest: restData?.trending?.length || 0, using: filteredTrendingItems.length },
+    duplicates: { signalr: duplicates.items.length, rest: restData?.duplicates?.length || 0, using: filteredDuplicateItems.length },
     inactive: { signalr: inactive.items.length, rest: restData?.inactiveChildren?.length || 0, using: inactiveItems.length },
     connected: trending.connected || duplicates.connected
   });
   
   // Behavior changes only come from SignalR (not in REST API)
   const behaviorItems = behaviors.items;
-
-  // Filter out behavior-related messages that shouldn't appear in wishlist sections
-  const behaviorKeywords = ['behavior', 'behave', 'chores', 'naughty', 'nice list', 'improve', 'BEHAVIOR REPORT'];
-  const isBehaviorMessage = (text: string) => {
-    if (!text) return false;
-    const lowerText = text.toLowerCase();
-    return behaviorKeywords.some(keyword => lowerText.includes(keyword.toLowerCase()));
-  };
-
-  // Filter trending items to exclude behavior messages
-  const filteredTrendingItems = trendingItems.filter((item: any) => 
-    item.item && !isBehaviorMessage(item.item)
-  );
-
-  // Filter duplicate items to exclude behavior messages
-  const filteredDuplicateItems = duplicateItems.filter((item: any) => 
-    item.item && !isBehaviorMessage(item.item)
-  );
   
   console.log('[DrasiSignalR] Filtered duplicates:', {
-    original: duplicateItems.length,
+    original: rawDuplicateItems.length,
     filtered: filteredDuplicateItems.length,
     sample: filteredDuplicateItems.slice(0, 3)
   });
@@ -466,17 +480,19 @@ export const DrasiSignalRPanel: React.FC = () => {
         ))}
       </StreamList>
 
-      {/* Inactive Children */}
+      {/* Adults - No Longer Believe (formerly Inactive Children) */}
       <StreamList
-        title="Inactive Children (3+ Days)"
-        titleIcon="😴"
-        titleColor="var(--status-error)"
+        title="All Grown Up! 🎄"
+        titleIcon="🧑"
+        titleColor="var(--gold-accent)"
+        isEmpty={inactiveItems.length === 0}
+        emptyMessage="Everyone still believes in Santa! ✨"
       >
         {inactiveItems.slice(0, 5).map((item: any, idx: number) => (
           <StreamItem key={item.childId || idx}>
-            <span>👶 {item.childId}</span>
+            <span>🧑 {item.childId}</span>
             <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              {item.lastEventDays || item.daysSinceLastEvent || 3} days ago
+              No longer believes ({item.lastEventDays || item.daysSinceLastEvent || 3}+ days)
             </span>
           </StreamItem>
         ))}

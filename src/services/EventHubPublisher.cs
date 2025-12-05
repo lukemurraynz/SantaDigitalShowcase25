@@ -1,6 +1,7 @@
 using Azure.Messaging.EventHubs;
 using Azure.Messaging.EventHubs.Producer;
 using Azure.Identity;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -44,9 +45,53 @@ public class EventHubPublisher : IEventPublisher, IAsyncDisposable
             return;
         }
 
-        // Flatten the payload structure for Drasi EventHub source
+        // Check if wishlist is in demo format { items: [...] } or production format { id, text, category, ... }
+        var items = wishlist?["items"]?.AsArray();
+        if (items != null && items.Count > 0)
+        {
+            // Demo format: Convert items array to a single wishlist text
+            var itemTexts = items
+                .Select(item => item?.ToString() ?? string.Empty)
+                .Where(text => !string.IsNullOrWhiteSpace(text))
+                .ToList();
+
+            if (itemTexts.Any())
+            {
+                _logger.LogInformation("📝 Processing demo format with {Count} items", itemTexts.Count);
+                // Create a single wishlist entry from the items
+                var payload = new
+                {
+                    childId,
+                    dedupeKey,
+                    schemaVersion,
+                    occurredAt = DateTime.UtcNow,
+                    type = "wishlist-update",
+                    id = dedupeKey, // Use dedupeKey as unique ID
+                    text = string.Join(", ", itemTexts),
+                    category = "demo",
+                    budgetEstimate = 100.0,
+                    createdAt = DateTime.UtcNow.ToString("o"),
+                    RequestType = "gift",
+                    StatusChange = (string?)null
+                };
+                var json = JsonSerializer.Serialize(payload);
+                _logger.LogInformation("📋 EventHub payload (demo format): {Json}", json);
+                using var batch = await _producer.CreateBatchAsync(ct);
+                if (!batch.TryAdd(new EventData(Encoding.UTF8.GetBytes(json))))
+                {
+                    _logger.LogInformation("📨 Sending single wishlist event for child {ChildId}", childId);
+                    await _producer.SendAsync(new[] { new EventData(Encoding.UTF8.GetBytes(json)) }, ct);
+                    return;
+                }
+                _logger.LogInformation("📦 Sending batched wishlist event for child {ChildId}", childId);
+                await _producer.SendAsync(batch, ct);
+                return;
+            }
+        }
+
+        // Production format: Flatten the payload structure for Drasi EventHub source
         // Drasi creates graph nodes from top-level properties, so we need to flatten nested wishlist data
-        var payload = new
+        var prodPayload = new
         {
             childId,
             dedupeKey,
@@ -63,18 +108,18 @@ public class EventHubPublisher : IEventPublisher, IAsyncDisposable
             RequestType = wishlist?["RequestType"]?.ToString() ?? wishlist?["requestType"]?.ToString() ?? "gift",
             StatusChange = wishlist?["StatusChange"]?.ToString() ?? wishlist?["statusChange"]?.ToString()
         };
-        var json = JsonSerializer.Serialize(payload);
-        _logger.LogInformation("📋 EventHub payload: {Json}", json);
-        using var batch = await _producer.CreateBatchAsync(ct);
-        if (!batch.TryAdd(new EventData(Encoding.UTF8.GetBytes(json))))
+        var prodJson = JsonSerializer.Serialize(prodPayload);
+        _logger.LogInformation("📋 EventHub payload (production format): {Json}", prodJson);
+        using var prodBatch = await _producer.CreateBatchAsync(ct);
+        if (!prodBatch.TryAdd(new EventData(Encoding.UTF8.GetBytes(prodJson))))
         {
             // Fallback: send single event
             _logger.LogInformation("📨 Sending single wishlist event for child {ChildId}", childId);
-            await _producer.SendAsync(new[] { new EventData(Encoding.UTF8.GetBytes(json)) }, ct);
+            await _producer.SendAsync(new[] { new EventData(Encoding.UTF8.GetBytes(prodJson)) }, ct);
             return;
         }
         _logger.LogInformation("📦 Sending batched wishlist event for child {ChildId}", childId);
-        await _producer.SendAsync(batch, ct);
+        await _producer.SendAsync(prodBatch, ct);
     }
 
     public async Task PublishRecommendationAsync(string childId, string schemaVersion, JsonNode recommendationSet, CancellationToken ct = default)

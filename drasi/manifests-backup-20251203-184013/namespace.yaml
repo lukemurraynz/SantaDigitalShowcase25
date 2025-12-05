@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: drasi
-  labels:
-    azd-service-name: drasi

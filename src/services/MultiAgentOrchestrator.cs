@@ -1,3 +1,4 @@
+using Azure;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Models;
@@ -11,6 +12,12 @@ namespace Services;
 public interface IMultiAgentOrchestrator
 {
     Task<string> RunCollaborativeRecommendationAsync(string childId, NiceStatus status, CancellationToken ct = default);
+
+    /// <summary>
+    /// Optimized parallel execution - Analyst and Creative run concurrently, then Reviewer synthesizes.
+    /// This reduces total time from ~60s (3 sequential) to ~40s (2 parallel + 1 sequential).
+    /// </summary>
+    Task<string> RunCollaborativeRecommendationOptimizedAsync(string childId, NiceStatus status, CancellationToken ct = default);
 }
 
 public class MultiAgentOrchestrator : IMultiAgentOrchestrator
@@ -54,7 +61,25 @@ public class MultiAgentOrchestrator : IMultiAgentOrchestrator
                 ?? Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME")
                 ?? throw new InvalidOperationException("AZURE_OPENAI_DEPLOYMENT_NAME is not configured.");
 
-            var azureClient = new Azure.AI.OpenAI.AzureOpenAIClient(new Uri(endpoint), new Azure.Identity.DefaultAzureCredential());
+            // Prefer API Key if provided (for emergency workaround), otherwise use Managed Identity
+            string? apiKey = _configuration["AZURE_OPENAI_API_KEY"] ?? Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
+
+            // Configure client options with extended network timeout for AI operations
+            // Each agent call may take 20-40s with tool calling, so we need 60s per call
+            var clientOptions = new Azure.AI.OpenAI.AzureOpenAIClientOptions
+            {
+                NetworkTimeout = TimeSpan.FromSeconds(60)
+            };
+
+            Azure.AI.OpenAI.AzureOpenAIClient azureClient;
+            if (!string.IsNullOrEmpty(apiKey))
+            {
+                azureClient = new Azure.AI.OpenAI.AzureOpenAIClient(new Uri(endpoint), new Azure.AzureKeyCredential(apiKey), clientOptions);
+            }
+            else
+            {
+                azureClient = new Azure.AI.OpenAI.AzureOpenAIClient(new Uri(endpoint), new Azure.Identity.DefaultAzureCredential(), clientOptions);
+            }
             _chatClient = azureClient.GetChatClient(deploymentName).AsIChatClient();
         }
         return _chatClient;
@@ -90,40 +115,18 @@ public class MultiAgentOrchestrator : IMultiAgentOrchestrator
         _analystAgent = chatClient.CreateAIAgent(
             name: "BehaviorAnalyst",
             instructions: """
-            You are the Behavior Analyst Elf at the North Pole. Your role is to:
-            - Analyze child behavior patterns and status (Nice/Naughty)
-            - Identify key interests and developmental needs
-            - Extract insights that will guide gift recommendations
-            - Consider age-appropriateness and educational value
-            - USE TOOLS to get REAL DATA from our live systems instead of guessing
+            You are the Behavior Analyst Elf. Be CONCISE - output max 200 words.
 
-            � CRITICAL FIRST STEP: ALWAYS call GetChildWishlistItems FIRST!
-            This shows you exactly what the child requested. Your recommendations must be based on their actual wishes.
+            WORKFLOW (call tools in this order):
+            1. GetChildWishlistItems - see what they requested
+            2. GetChildBehaviorHistory - check their behavior
+            3. QueryTrendingWishlistItems - see global trends
 
-            🎯 IMPORTANT: You have access to DRASI real-time event graph tools:
-            - QueryTrendingWishlistItems: See what's hot RIGHT NOW across all children
-            - FindChildrenWithDuplicateWishlists: Find items a child REALLY wants (multiple requests)
-            - QueryGlobalWishlistDuplicates: See universally popular items
-            - FindInactiveChildren: Identify children who may need reminders
-
-            Also Available:
-            - GetChildBehaviorHistory: Get individual child's actual behavior data
-            - GetTrendingGifts: See age-appropriate popular categories
-
-            WORKFLOW:
-            1. Call GetChildWishlistItems to see what they actually requested
-            2. Check if this child has duplicate wishlist items (shows strong interest)
-            3. Check trending items to see if child's wishes align with global trends
-            4. Analyze behavior and preferences
-
-            Output a concise analysis highlighting:
-            - What the child specifically requested (from their wishlist!)
-            - Current behavior assessment
-            - Key interests and patterns (use DRASI data!)
-            - Items child has requested multiple times (PRIORITY!)
-            - How child's wishes compare to trending items
-            - Recommended gift themes (educational vs entertainment)
-            - Budget considerations
+            OUTPUT (brief bullet points):
+            • Child's wishlist items
+            • Behavior assessment (Nice/Naughty reasoning)
+            • Top interests
+            • Budget considerations
             """,
             tools: tools
         );
@@ -132,22 +135,18 @@ public class MultiAgentOrchestrator : IMultiAgentOrchestrator
         _creativeAgent = chatClient.CreateAIAgent(
             name: "CreativeGiftElf",
             instructions: """
-            You are the Creative Gift Elf. Your role is to:
-            - Generate imaginative, engaging gift recommendations
-            - Consider both fun and educational value
-            - Suggest alternatives that align with behavior status
-            - Create compelling descriptions that excite children
-            - USE TOOLS to check real inventory and availability
+            You are the Creative Gift Elf. Be CONCISE - output max 200 words.
 
-            Available Tools:
-            - SearchGiftInventory: Find actual gifts in stock
-            - CheckBudgetConstraints: Validate prices
-            - GetGiftAvailability: Check if items can be delivered on time
+            WORKFLOW:
+            1. SearchGiftInventory - find matching gifts
+            2. CheckBudgetConstraints - validate prices
 
-            For Nice children: Focus on rewarding achievements and interests
-            For Naughty children: Emphasize character-building and educational items
+            OUTPUT 3 gift ideas with:
+            • Gift name and brief description (1 line each)
+            • Why it fits the child's interests
+            • Price range
 
-            Output creative gift suggestions with engaging descriptions.
+            Nice children: rewarding gifts. Naughty children: educational/character-building.
             """,
             tools: tools
         );
@@ -156,14 +155,18 @@ public class MultiAgentOrchestrator : IMultiAgentOrchestrator
         _reviewerAgent = chatClient.CreateAIAgent(
             name: "QualityReviewerElf",
             instructions: """
-            You are the Quality Reviewer Elf. Your role is to:
-            - Review gift recommendations for appropriateness
-            - Ensure alignment with behavior status (Nice/Naughty)
-            - Validate safety, age-appropriateness, and budget
-            - Refine rationales to be clear and encouraging
+            You are the Quality Reviewer Elf. Be CONCISE - output max 300 words.
 
-            Provide constructive feedback and final polished recommendations.
-            Output refined recommendations with improved rationales.
+            Review and synthesize the analysis and suggestions into FINAL recommendations.
+
+            OUTPUT:
+            🎁 TOP 3 GIFT RECOMMENDATIONS
+            For each gift:
+            1. [Gift Name] - [One-line description]
+               ✓ Why it's perfect: [1 sentence]
+               💰 Budget: [price]
+
+            End with a brief encouraging message for the child.
             """
         );
     }
@@ -176,14 +179,22 @@ public class MultiAgentOrchestrator : IMultiAgentOrchestrator
             InitializeAgents();
         }
 
+        var startTime = System.Diagnostics.Stopwatch.StartNew();
         _logger.LogInformation("Starting collaborative multi-agent recommendation for child {ChildId} with status {Status}",
             childId, status);
 
         try
         {
-            // STEP 1: Analyst gathers insights
-            ChildProfile? profile = await _profileService.GetChildProfileAsync(childId, ct);
-            IReadOnlyList<Recommendation> existingRecs = await _recommendationService.GetTopNAsync(childId, 5, ct);
+            // STEP 1: Gather data in parallel (Profile + Existing Recommendations)
+            var profileTask = _profileService.GetChildProfileAsync(childId, ct);
+            var existingRecsTask = _recommendationService.GetTopNAsync(childId, 5, ct);
+            await Task.WhenAll(profileTask, existingRecsTask);
+
+            ChildProfile? profile = await profileTask;
+            IReadOnlyList<Recommendation> existingRecs = await existingRecsTask;
+
+            var dataFetchTime = startTime.ElapsedMilliseconds;
+            _logger.LogInformation("Data fetching completed in {ElapsedMs}ms for {ChildId}", dataFetchTime, childId);
 
             string context = $"""
             Child ID: {childId}
@@ -193,10 +204,12 @@ public class MultiAgentOrchestrator : IMultiAgentOrchestrator
             Existing recommendations: {string.Join("; ", existingRecs.Select(r => r.Suggestion))}
             """;
 
+            var analystStartTime = startTime.ElapsedMilliseconds;
             AgentRunResponse? analysisResult = await _analystAgent!.RunAsync($"Analyze this child profile:\n{context}", cancellationToken: ct);
             string analysis = analysisResult?.ToString() ?? "Unable to analyze profile";
 
-            _logger.LogInformation("Analyst completed analysis for {ChildId}", childId);
+            var analystTime = startTime.ElapsedMilliseconds - analystStartTime;
+            _logger.LogInformation("Analyst completed analysis for {ChildId} in {ElapsedMs}ms", childId, analystTime);
 
             // STEP 2: Creative agent generates ideas based on analysis
             string creativePrompt = $"""
@@ -206,10 +219,12 @@ public class MultiAgentOrchestrator : IMultiAgentOrchestrator
             Generate 3-5 creative gift recommendations that align with the child's {status} status.
             """;
 
+            var creativeStartTime = startTime.ElapsedMilliseconds;
             AgentRunResponse? creativeResult = await _creativeAgent!.RunAsync(creativePrompt, cancellationToken: ct);
             string suggestions = creativeResult?.ToString() ?? "Unable to generate suggestions";
 
-            _logger.LogInformation("Creative agent generated suggestions for {ChildId}", childId);
+            var creativeTime = startTime.ElapsedMilliseconds - creativeStartTime;
+            _logger.LogInformation("Creative agent generated suggestions for {ChildId} in {ElapsedMs}ms", childId, creativeTime);
 
             // STEP 3: Reviewer refines and validates
             string reviewPrompt = $"""
@@ -226,10 +241,14 @@ public class MultiAgentOrchestrator : IMultiAgentOrchestrator
             - Encouraging and positive in tone
             """;
 
+            var reviewerStartTime = startTime.ElapsedMilliseconds;
             AgentRunResponse? finalResult = await _reviewerAgent!.RunAsync(reviewPrompt, cancellationToken: ct);
             string finalRecommendations = finalResult?.ToString() ?? suggestions;
 
-            _logger.LogInformation("Reviewer completed refinement for {ChildId}", childId);
+            var reviewerTime = startTime.ElapsedMilliseconds - reviewerStartTime;
+            var totalTime = startTime.ElapsedMilliseconds;
+            _logger.LogInformation("Reviewer completed refinement for {ChildId} in {ElapsedMs}ms. Total time: {TotalMs}ms",
+                childId, reviewerTime, totalTime);
 
             // Return the collaborative result
             return $"""
@@ -252,6 +271,115 @@ public class MultiAgentOrchestrator : IMultiAgentOrchestrator
             _logger.LogError(ex, "Multi-agent orchestration failed for child {ChildId}. Details: {Details}",
                 childId, ex.ToString());
             return $"Collaborative recommendation failed: {ex.Message}\n\nStack Trace: {ex.StackTrace}";
+        }
+    }
+
+    /// <summary>
+    /// Optimized version that runs Analyst and Creative agents in parallel,
+    /// reducing total time from ~60s to ~40s.
+    /// </summary>
+    public async Task<string> RunCollaborativeRecommendationOptimizedAsync(string childId, NiceStatus status, CancellationToken ct = default)
+    {
+        // Initialize agents lazily on first use
+        if (_analystAgent == null || _creativeAgent == null || _reviewerAgent == null)
+        {
+            InitializeAgents();
+        }
+
+        var startTime = System.Diagnostics.Stopwatch.StartNew();
+        _logger.LogInformation("[OPTIMIZED] Starting parallel multi-agent recommendation for child {ChildId} with status {Status}",
+            childId, status);
+
+        try
+        {
+            // STEP 1: Gather data in parallel (Profile + Existing Recommendations)
+            var profileTask = _profileService.GetChildProfileAsync(childId, ct);
+            var existingRecsTask = _recommendationService.GetTopNAsync(childId, 5, ct);
+            await Task.WhenAll(profileTask, existingRecsTask);
+
+            ChildProfile? profile = await profileTask;
+            IReadOnlyList<Recommendation> existingRecs = await existingRecsTask;
+
+            var dataFetchTime = startTime.ElapsedMilliseconds;
+            _logger.LogInformation("[OPTIMIZED] Data fetching completed in {ElapsedMs}ms", dataFetchTime);
+
+            string context = $"""
+            Child: {childId} | Status: {status} | Age: {profile?.Age ?? 0}
+            Preferences: {string.Join(", ", profile?.Preferences ?? [])}
+            Prior recommendations: {string.Join("; ", existingRecs.Take(3).Select(r => r.Suggestion))}
+            """;
+
+            // STEP 2: Run Analyst and Creative agents IN PARALLEL
+            // They both use tools independently, so no need to wait for one to finish
+            var parallelStart = startTime.ElapsedMilliseconds;
+            _logger.LogInformation("[OPTIMIZED] Starting PARALLEL agent execution (Analyst + Creative)");
+
+            var analystTask = _analystAgent!.RunAsync(
+                $"Analyze child profile:\n{context}",
+                cancellationToken: ct);
+
+            var creativeTask = _creativeAgent!.RunAsync(
+                $"Generate 3 gift ideas for {status} child.\nContext:\n{context}",
+                cancellationToken: ct);
+
+            // Wait for both to complete
+            await Task.WhenAll(analystTask, creativeTask);
+
+            var parallelTime = startTime.ElapsedMilliseconds - parallelStart;
+            _logger.LogInformation("[OPTIMIZED] Parallel agents completed in {ElapsedMs}ms (saved ~20s vs sequential)", parallelTime);
+
+            string analysis = (await analystTask)?.ToString() ?? "Unable to analyze profile";
+            string suggestions = (await creativeTask)?.ToString() ?? "Unable to generate suggestions";
+
+            // STEP 3: Reviewer synthesizes both outputs (must be sequential)
+            string reviewPrompt = $"""
+            Synthesize these into FINAL gift recommendations for {childId} ({status}):
+
+            ANALYSIS:
+            {analysis}
+
+            SUGGESTIONS:
+            {suggestions}
+
+            Output 3 polished recommendations with reasons.
+            """;
+
+            var reviewerStart = startTime.ElapsedMilliseconds;
+            AgentRunResponse? finalResult = await _reviewerAgent!.RunAsync(reviewPrompt, cancellationToken: ct);
+            string finalRecommendations = finalResult?.ToString() ?? suggestions;
+
+            var reviewerTime = startTime.ElapsedMilliseconds - reviewerStart;
+            var totalTime = startTime.ElapsedMilliseconds;
+            _logger.LogInformation("[OPTIMIZED] Reviewer completed in {ReviewerMs}ms. TOTAL: {TotalMs}ms",
+                reviewerTime, totalTime);
+
+            return $"""
+            === Multi-Agent Collaborative Recommendation (Optimized) ===
+            Child: {childId} | Status: {status}
+            ⚡ Execution: {totalTime}ms (parallel optimization enabled)
+
+            📊 Analyst Insights:
+            {analysis}
+
+            💡 Creative Suggestions:
+            {suggestions}
+
+            🎁 Final Recommendations:
+            {finalRecommendations}
+            """;
+        }
+        catch (OperationCanceledException)
+        {
+            var elapsed = startTime.ElapsedMilliseconds;
+            _logger.LogWarning("[OPTIMIZED] Request cancelled after {ElapsedMs}ms for child {ChildId}", elapsed, childId);
+            return $"Request cancelled after {elapsed}ms. The multi-agent orchestration was interrupted.";
+        }
+        catch (Exception ex)
+        {
+            var elapsed = startTime.ElapsedMilliseconds;
+            _logger.LogError(ex, "[OPTIMIZED] Multi-agent orchestration failed after {ElapsedMs}ms for child {ChildId}",
+                elapsed, childId);
+            return $"Collaborative recommendation failed after {elapsed}ms: {ex.Message}";
         }
     }
 }

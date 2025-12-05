@@ -1,2 +1,0 @@
-error: unable to read URL "https://github.com/drasi-project/drasi-platform/releases/download/v0.10.0/drasi-crds.yaml", server reported 404 Not Found, status code=404
-

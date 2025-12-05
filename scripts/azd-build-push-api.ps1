@@ -5,7 +5,7 @@ param(
 )
 
 if (-not $EnvName) { $EnvName = "dev" }
-if (-not $ResourceGroup) { $ResourceGroup = "santaworkshop-$EnvName-rg" }
+if (-not $ResourceGroup) { $ResourceGroup = "santadigitalshowcase-$EnvName-rg" }
 
 Write-Host "🔧 Fallback: local docker build & push for API" -ForegroundColor Yellow
 if (-not $AcrServer) {
@@ -15,7 +15,7 @@ if (-not $AcrServer) {
     Write-Error "ACR server not found in azd env. Aborting."; exit 1
 }
 
-$repo = "$AcrServer/santaworkshop/api-$EnvName"
+$repo = "$AcrServer/santadigitalshowcase/api-$EnvName"
 $tag = (Get-Date -Format "yyyyMMdd-HHmmss")
 $image = "${repo}:$tag"
 
@@ -30,7 +30,7 @@ Write-Host "Pushing image: $image" -ForegroundColor Cyan
 $push = docker push $image 2>&1
 if ($LASTEXITCODE -ne 0) { Write-Error "Docker push failed"; Write-Host $push; exit 1 }
 
-$appName = "santaworkshop-$EnvName-api"
+$appName = "santadigitalshowcase-$EnvName-api"
 Write-Host "Updating Container App $appName to image $image" -ForegroundColor Cyan
 az containerapp update -n $appName -g $ResourceGroup --image $image | Out-Null
 if ($LASTEXITCODE -eq 0) {

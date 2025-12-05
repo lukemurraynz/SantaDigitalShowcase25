@@ -13,8 +13,8 @@ namespace Services;
 public interface IStreamingAgentService
 {
     IAsyncEnumerable<StreamingAgentUpdate> StreamRecommendationGenerationAsync(
-        string childId, 
-        NiceStatus status, 
+        string childId,
+        NiceStatus status,
         CancellationToken ct = default);
 }
 
@@ -141,7 +141,8 @@ public class StreamingAgentService : IStreamingAgentService
         }
 
         // Simulate streaming by sending text in chunks
-        int chunkSize = 10; // characters per chunk
+        // Using 80 chars per chunk for readable streaming output
+        int chunkSize = 80; // characters per chunk - larger for better readability
         int tokenCount = 0;
         for (int i = 0; i < fullText.Length; i += chunkSize)
         {

@@ -19,7 +19,7 @@ New-Item -ItemType Directory -Path $logDir -Force | Out-Null
 Write-Phase "Phase 1: Diagnose Current State"
 
 # Check Container App
-$app = az containerapp show -n santaworkshop-nks-api -g rg-nks -o json 2>$null | ConvertFrom-Json
+$app = az containerapp show -n santadigitalshowcase-nks-api -g rg-nks -o json 2>$null | ConvertFrom-Json
 if ($app) {
     Write-Info "Container App exists: $($app.properties.latestRevisionName)"
     $currentFqdn = $app.properties.configuration.ingress.fqdn
@@ -56,13 +56,13 @@ else {
     Write-Info "Fix 1: Recreate Container App without VNet (external access issue workaround)"
     
     # Delete current app
-    az containerapp delete -n santaworkshop-nks-api -g rg-nks --yes 2>&1 | Out-Null
+    az containerapp delete -n santadigitalshowcase-nks-api -g rg-nks --yes 2>&1 | Out-Null
     Start-Sleep -Seconds 20
     
     # Get environment
-    $envName = "santaworkshop-nks-cae"
+    $envName = "santadigitalshowcase-nks-cae"
     $acrName = (az acr list -g rg-nks --query '[0].name' -o tsv)
-    $imageName = "$acrName.azurecr.io/santaworkshop-nks-api:latest"
+    $imageName = "$acrName.azurecr.io/santadigitalshowcase-nks-api:latest"
     
     Write-Info "Deploying with azd (will use correct configuration)..."
     azd deploy api 2>&1 | Out-File "$logDir/api-deploy.log"
@@ -70,7 +70,7 @@ else {
     Start-Sleep -Seconds 30
     
     # Verify deployment
-    $app = az containerapp show -n santaworkshop-nks-api -g rg-nks -o json 2>$null | ConvertFrom-Json
+    $app = az containerapp show -n santadigitalshowcase-nks-api -g rg-nks -o json 2>$null | ConvertFrom-Json
     if ($app) {
         Write-Success "Container App redeployed"
         $currentFqdn = $app.properties.configuration.ingress.fqdn
@@ -79,7 +79,7 @@ else {
 
 Write-Phase "Phase 3: Update Frontend Configuration"
 
-$apiHost = (az containerapp show -n santaworkshop-nks-api -g rg-nks --query 'properties.configuration.ingress.fqdn' -o tsv 2>$null)
+$apiHost = (az containerapp show -n santadigitalshowcase-nks-api -g rg-nks --query 'properties.configuration.ingress.fqdn' -o tsv 2>$null)
 if ($apiHost) {
     azd env set apiHost $apiHost
     Write-Success "Updated apiHost: $apiHost"
@@ -140,13 +140,13 @@ if ($ehNs) {
     Write-Info "Assigning Event Hubs RBAC to Drasi MI on namespace $ehNs"
     & "$PSScriptRoot/enable-eventhub-managed-identity.ps1" -ResourceGroup $rg -NamespaceName $ehNs
 }
-$appEnv = az containerapp show -n santaworkshop-nks-api -g rg-nks --query 'properties.template.containers[0].env[?name==`DRASI_VIEW_SERVICE_BASE_URL`].value' -o tsv 2>$null
+$appEnv = az containerapp show -n santadigitalshowcase-nks-api -g rg-nks --query 'properties.template.containers[0].env[?name==`DRASI_VIEW_SERVICE_BASE_URL`].value' -o tsv 2>$null
 if ($appEnv) {
     Write-Success "Drasi URL configured: $appEnv"
 }
 else {
     Write-Info "Updating Drasi URL to internal ClusterIP..."
-    az containerapp update -n santaworkshop-nks-api -g rg-nks --set-env-vars "DRASI_VIEW_SERVICE_BASE_URL=$drasiUrl" --output none 2>&1 | Out-Null
+    az containerapp update -n santadigitalshowcase-nks-api -g rg-nks --set-env-vars "DRASI_VIEW_SERVICE_BASE_URL=$drasiUrl" --output none 2>&1 | Out-Null
     Start-Sleep -Seconds 20
 }
 

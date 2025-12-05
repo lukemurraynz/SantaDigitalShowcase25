@@ -1,5 +1,0 @@
-NAME           AGE
-drasi-pubsub   66m
-drasi-state    66m
-statestore     66m
-

@@ -62,7 +62,7 @@ if ($UpdateContainerApp) {
     $rg = azd env get-value AZURE_RESOURCE_GROUP 2>$null
     
     if ($envName -and $rg) {
-        $appName = "santaworkshop-$envName-api"
+        $appName = "santadigitalshowcase-$envName-api"
         $viewUrl = azd env get-value DRASI_VIEW_SERVICE_URL 2>$null
         $signalrUrl = azd env get-value DRASI_SIGNALR_URL 2>$null
         

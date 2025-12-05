@@ -342,7 +342,7 @@ function Ensure-KubeCredentials {
   if ([string]::IsNullOrWhiteSpace($envName)) { try { $envName = azd env get-value AZURE_ENV_NAME 2>$null } catch {} }
 
   $project = $Env:AZURE_PROJECT_NAME
-  if ([string]::IsNullOrWhiteSpace($project)) { $project = 'santaworkshop' }
+  if ([string]::IsNullOrWhiteSpace($project)) { $project = 'santadigitalshowcase' }
 
   $aksName = $Env:AZURE_AKS_NAME
   if ([string]::IsNullOrWhiteSpace($aksName)) { $aksName = ("$project-$envName-aks").ToLower() }
@@ -379,7 +379,7 @@ function Ensure-CosmosStateStoreSecret {
     # Resolve Cosmos credentials early
     $rg = $Env:AZURE_RESOURCE_GROUP; if ([string]::IsNullOrWhiteSpace($rg)) { try { $rg = azd env get-value AZURE_RESOURCE_GROUP 2>$null } catch {} }
     $envName = $Env:AZURE_ENV_NAME; if ([string]::IsNullOrWhiteSpace($envName)) { try { $envName = azd env get-value AZURE_ENV_NAME 2>$null } catch {} }
-    $project = $Env:AZURE_PROJECT_NAME; if ([string]::IsNullOrWhiteSpace($project)) { $project = 'santaworkshop' }
+    $project = $Env:AZURE_PROJECT_NAME; if ([string]::IsNullOrWhiteSpace($project)) { $project = 'santadigitalshowcase' }
     $cosmos = ("$project-$envName-cosmos").ToLower()
 
     $endpoint = ''
@@ -1647,7 +1647,7 @@ function Update-ContainerAppWithDrasiUrls {
     }
   }
 
-  $appName = "santaworkshop-$envName-api"
+  $appName = "santadigitalshowcase-$envName-api"
 
   try {
     $viewUrl = azd env get-value DRASI_VIEW_SERVICE_URL 2>$null
@@ -1721,8 +1721,8 @@ function Initialize-WishlistSyncIfReady {
     $envName = $Env:AZURE_ENV_NAME; if (-not $envName) { $envName = azd env get-value AZURE_ENV_NAME 2>$null }
     $rg = $Env:AZURE_RESOURCE_GROUP; if (-not $rg) { $rg = azd env get-value AZURE_RESOURCE_GROUP 2>$null }
     if (-not $envName) { $envName = "dev" }
-    if (-not $rg) { $rg = "santaworkshop-$envName-rg" }
-    $ns = ("santaworkshop-$envName-eh").ToLower()
+    if (-not $rg) { $rg = "santadigitalshowcase-$envName-rg" }
+    $ns = ("santadigitalshowcase-$envName-eh").ToLower()
     $rule = az eventhubs eventhub authorization-rule list -g $rg --namespace-name $ns --eventhub-name $EhHub -o json 2>$null | ConvertFrom-Json | Where-Object { $_.rights -contains 'Send' } | Select-Object -First 1
     if (-not $rule) { $rule = az eventhubs eventhub authorization-rule list -g $rg --namespace-name $ns --eventhub-name $EhHub -o json 2>$null | ConvertFrom-Json | Where-Object { $_.rights -contains 'Manage' } | Select-Object -First 1 }
     if ($rule) {
@@ -1805,8 +1805,8 @@ Initialize-WishlistSyncIfReady -Namespace $cpNs -QueryName 'wishlist-updates' -E
 try {
   $envName = Get-ActiveAzdEnvironmentName
   $rg = Get-AzdEnvValue -Keys @('AZURE_RESOURCE_GROUP') -EnvironmentName $envName
-  if (-not $rg) { $rg = "santaworkshop-$envName-rg" }
-  $apiApp = "santaworkshop-$envName-api"
+  if (-not $rg) { $rg = "santadigitalshowcase-$envName-rg" }
+  $apiApp = "santadigitalshowcase-$envName-api"
   $guardPath = Join-Path (Join-Path $PSScriptRoot '..') 'scripts/post-provision-guardrails.ps1'
   if (Test-Path $guardPath) {
     Write-Host "Running post-provision guardrails..." -ForegroundColor Cyan

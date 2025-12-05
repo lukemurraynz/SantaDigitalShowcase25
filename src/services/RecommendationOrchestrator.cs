@@ -30,6 +30,7 @@ public sealed partial class RecommendationOrchestrator : IRecommendationOrchestr
 
     public async Task<IReadOnlyList<Recommendation>> GenerateAsync(string childId, int topN, CancellationToken ct = default)
     {
+        _logger.LogInformation("🔵 RecommendationOrchestrator.GenerateAsync called for {ChildId}, topN={TopN}", childId, topN);
         IReadOnlyList<Recommendation> items;
         try
         {
@@ -41,27 +42,36 @@ public sealed partial class RecommendationOrchestrator : IRecommendationOrchestr
             return Array.Empty<Recommendation>();
         }
 
-        var list = new List<Recommendation>(items.Count);
-        foreach (var r in items)
+        if (items.Count == 0)
+        {
+            return Array.Empty<Recommendation>();
+        }
+
+        // PERFORMANCE OPTIMIZATION: Run rationale enrichment in PARALLEL instead of sequentially
+        // This reduces response time from ~14s (3×4-5s) to ~5s (single longest call)
+        _logger.LogInformation("Enriching {Count} recommendations in parallel for child {ChildId}", items.Count, childId);
+
+        var enrichmentTasks = items.Select(async r =>
         {
             try
             {
-                var withRationale = await _rationale.AddRationaleAsync(r, ct);
-                list.Add(withRationale);
+                return await _rationale.AddRationaleAsync(r, ct);
             }
             catch (OperationCanceledException)
             {
-                // On cancellation, return what we have so far
-                return list;
+                // On cancellation, return the recommendation without enhanced rationale
+                return r with { Rationale = $"Recommended '{r.Suggestion}' for child '{childId}' based on their profile and letter to the North Pole." };
             }
             catch (Exception ex)
             {
                 // If rationale generation fails for one item, add the item without rationale
                 Log_RationaleEnrichmentFailed(_logger, ex, childId, r.Id);
-                list.Add(r with { Rationale = $"Recommended '{r.Suggestion}' for child '{childId}' based on their profile and letter to the North Pole." });
+                return r with { Rationale = $"Recommended '{r.Suggestion}' for child '{childId}' based on their profile and letter to the North Pole." };
             }
-        }
-        return list;
+        });
+
+        var enrichedRecommendations = await Task.WhenAll(enrichmentTasks);
+        return enrichedRecommendations.ToList();
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to fetch recommendations for child {ChildId}")]

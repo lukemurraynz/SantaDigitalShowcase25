@@ -10,8 +10,9 @@ interface LiveRecommendation {
 export function useChildRecommendationsLive(childId: string) {
   const [items, setItems] = useState<LiveRecommendation[]>([]);
   useEffect(() => {
+    // Always clear items when childId changes to prevent stale data
+    setItems([]);
     if (!childId) {
-      setItems([]);
       return;
     }
     const es = new EventSource(

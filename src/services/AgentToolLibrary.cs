@@ -445,63 +445,76 @@ public class AgentToolLibrary
         try
         {
             string queryContainerId = GetQueryContainerId();
-            var results = await _drasiClient.GetCurrentResultAsync(queryContainerId, "wishlist-duplicates-global", ct);
 
-            if (results.Count == 0)
+            // The global query may be misconfigured (returning itemCount instead of childCount)
+            // or not deployed at all. Always aggregate from by-child query which is reliable.
+            _logger.LogInformation("Querying global wishlist duplicates by aggregating from by-child data");
+            var byChildResults = await _drasiClient.GetCurrentResultAsync(queryContainerId, "wishlist-duplicates-by-child", ct);
+
+            if (byChildResults.Count == 0)
             {
-                return "No globally duplicated items found. Each child has unique wishes.";
+                return $"No items requested by {minChildren}+ children.";
             }
 
-            var global = results
+            // Aggregate: group by item, count distinct children
+            var aggregated = byChildResults
                 .Select(r => new
                 {
                     Item = r["item"]?.GetValue<string>() ?? "Unknown",
-                    ChildCount = r["childCount"]?.GetValue<int>() ?? 0
+                    ChildId = r["childId"]?.GetValue<string>() ?? "unknown"
                 })
+                .Where(x => !string.IsNullOrEmpty(x.Item) && x.Item != "Unknown")
+                .GroupBy(x => x.Item)
+                .Select(g => new { Item = g.Key, ChildCount = g.Select(x => x.ChildId).Distinct().Count() })
                 .Where(g => g.ChildCount >= minChildren)
                 .OrderByDescending(g => g.ChildCount)
                 .Take(10)
                 .ToList();
 
-            if (!global.Any())
+            if (!aggregated.Any())
             {
                 return $"No items requested by {minChildren}+ children.";
             }
 
-            string summary = $"""
-                🌍 GLOBALLY POPULAR WISHLIST ITEMS
-                ==================================
-                Items requested by multiple children:
-
-                """;
-
-            int rank = 1;
-            foreach (var item in global)
-            {
-                string popularity = item.ChildCount switch
-                {
-                    >= 10 => "🔥 VIRAL",
-                    >= 5 => "⭐ VERY POPULAR",
-                    >= 3 => "👍 POPULAR",
-                    _ => "📌 NOTABLE"
-                };
-
-                summary += $"{rank}. {item.Item}\n";
-                summary += $"   {popularity} - Requested by {item.ChildCount} children\n";
-                summary += $"   Action: Priority item for bulk ordering\n\n";
-                rank++;
-            }
-
-            summary += "💡 Insight: These items show universal appeal and should be prioritized for inventory.";
-            summary += "\n📊 Data Source: Drasi continuous query 'wishlist-duplicates-global'";
-
-            return summary;
+            return FormatGlobalDuplicatesResult(aggregated.Select(a => (a.Item, a.ChildCount)).ToList(), "Aggregated from Drasi 'wishlist-duplicates-by-child'");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to query global duplicates from Drasi");
             return $"Error querying global duplicates: {ex.Message}";
         }
+    }
+
+    private static string FormatGlobalDuplicatesResult(List<(string Item, int ChildCount)> items, string dataSource)
+    {
+        string summary = $"""
+            🌍 GLOBALLY POPULAR WISHLIST ITEMS
+            ==================================
+            Items requested by multiple children:
+
+            """;
+
+        int rank = 1;
+        foreach (var item in items)
+        {
+            string popularity = item.ChildCount switch
+            {
+                >= 10 => "🔥 VIRAL",
+                >= 5 => "⭐ VERY POPULAR",
+                >= 3 => "👍 POPULAR",
+                _ => "📌 NOTABLE"
+            };
+
+            summary += $"{rank}. {item.Item}\n";
+            summary += $"   {popularity} - Requested by {item.ChildCount} children\n";
+            summary += $"   Action: Priority item for bulk ordering\n\n";
+            rank++;
+        }
+
+        summary += "💡 Insight: These items show universal appeal and should be prioritized for inventory.";
+        summary += $"\n📊 Data Source: {dataSource}";
+
+        return summary;
     }
 
     /// <summary>

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models;
 using Services;
 using Drasicrhsit.Services;
+using Drasicrhsit.Infrastructure;
 using System.Text.Json.Serialization;
 
 namespace Services;
@@ -17,38 +18,81 @@ public static class EnhancedAgentApi
     public static IEndpointRouteBuilder MapEnhancedAgentApi(this IEndpointRouteBuilder app)
     {
         // Multi-agent collaborative recommendation with real-time Drasi context
+        // Supports ?optimized=true (default) for parallel execution, ?optimized=false for sequential
         app.MapPost("children/{childId}/recommendations/collaborative", async (
             string childId,
             IMultiAgentOrchestrator orchestrator,
-            IDrasiRealtimeService drasiRealtime,
+            IDrasiViewClient drasiClient,
+            IConfiguration config,
             NiceStatus? status,
+            bool? optimized,
             CancellationToken ct) =>
         {
             NiceStatus effectiveStatus = status ?? NiceStatus.Unknown;
+            bool useOptimized = optimized ?? true; // Default to optimized (parallel) execution
 
-            // Get real-time Drasi context for agent enrichment
-            var drasiContext = await drasiRealtime.GetLatestContextAsync(ct);
+            // Get query container ID from config
+            string queryContainerId = ConfigurationHelper.GetValue(
+                config,
+                "Drasi:QueryContainer",
+                "DRASI_QUERY_CONTAINER",
+                "default");
 
-            string result = await orchestrator.RunCollaborativeRecommendationAsync(childId, effectiveStatus, ct);
+            // Get real-time Drasi context by querying the view service directly
+            // This is more reliable than SignalR as it doesn't require a persistent connection
+            var trendingTask = drasiClient.GetCurrentResultAsync(queryContainerId, "wishlist-trending-1h", ct);
+            var duplicatesTask = drasiClient.GetCurrentResultAsync(queryContainerId, "wishlist-duplicates-by-child", ct);
+            await Task.WhenAll(trendingTask, duplicatesTask);
+
+            var trendingResults = await trendingTask;
+            var duplicateResults = await duplicatesTask;
+
+            // Parse trending items
+            var trendingItems = trendingResults
+                .Select(r => new
+                {
+                    item = r["item"]?.GetValue<string>() ?? "Unknown",
+                    frequency = r["frequency"]?.GetValue<int>() ?? 0
+                })
+                .OrderByDescending(t => t.frequency)
+                .Take(5)
+                .ToList();
+
+            // Parse duplicate alerts for this child
+            var duplicateAlerts = duplicateResults
+                .Where(r => r["childId"]?.GetValue<string>() == childId)
+                .Select(r => new
+                {
+                    childId = r["childId"]?.GetValue<string>() ?? "Unknown",
+                    item = r["item"]?.GetValue<string>() ?? "Unknown",
+                    count = r["duplicateCount"]?.GetValue<int>() ?? 0
+                })
+                .ToList();
+
+            // Use optimized parallel execution by default (saves ~20 seconds)
+            string result = useOptimized
+                ? await orchestrator.RunCollaborativeRecommendationOptimizedAsync(childId, effectiveStatus, ct)
+                : await orchestrator.RunCollaborativeRecommendationAsync(childId, effectiveStatus, ct);
 
             return Results.Ok(new
             {
                 childId,
                 status = effectiveStatus.ToString(),
+                optimized = useOptimized,
                 collaborativeRecommendation = result,
                 agentTypes = new[] { "BehaviorAnalyst", "CreativeGiftElf", "QualityReviewerElf" },
                 toolsUsed = new[] { "GetChildBehaviorHistory", "SearchGiftInventory", "CheckBudgetConstraints", "QueryDrasiGraph" },
                 drasiContext = new
                 {
-                    trendingItems = drasiContext.TrendingItems.Take(5),
-                    duplicateAlerts = drasiContext.Duplicates.Where(d => d.ChildId == childId),
-                    lastUpdate = drasiContext.LastUpdate
+                    trendingItems,
+                    duplicateAlerts,
+                    lastUpdate = DateTime.UtcNow
                 }
             });
         })
         .WithName("CollaborativeRecommendation")
         .WithTags("Frontend", "EnhancedAgents")
-        .WithDescription("Generate recommendations using multi-agent collaboration (Analyst → Creative → Reviewer)")
+        .WithDescription("Generate recommendations using multi-agent collaboration. Use ?optimized=true (default) for parallel execution (~40s) or ?optimized=false for sequential (~60s)")
         .Produces<object>(StatusCodes.Status200OK);
 
         // Streaming agent response (SSE)
@@ -202,7 +246,7 @@ public static class EnhancedAgentApi
             ILogger<Program> logger,
             CancellationToken ct) =>
         {
-            
+
             // Validate request body - returns early if null, guaranteeing non-null for rest of handler
             if (request is null)
             {
@@ -240,7 +284,7 @@ public static class EnhancedAgentApi
                     null,
                     request.NewStatus?.ToString(),
                     ct);
-                
+
                 logger.LogInformation("[BehaviorUpdate] Stored behavior update letter {LetterId} for child {ChildId}", letter.Id, childId);
             }
             catch (OperationCanceledException)
@@ -283,7 +327,7 @@ public static class EnhancedAgentApi
                 letterId = letter.Id,
                 requestType = letter.RequestType,
                 statusChange = request.NewStatus?.ToString(),
-                message = recommendationUpdateSucceeded 
+                message = recommendationUpdateSucceeded
                     ? "Behavior update processed and recommendations adjusted"
                     : "Behavior update stored (recommendation update pending)",
                 triggeredAgent = recommendationUpdateSucceeded

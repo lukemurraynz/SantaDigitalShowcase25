@@ -21,6 +21,7 @@ temp-*.html
 .vs/
 .vscode/*
 !.vscode/extensions.json
+!.vscode/tasks.json
 
 # .NET
 **/bin/

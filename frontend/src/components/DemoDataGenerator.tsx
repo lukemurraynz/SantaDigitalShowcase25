@@ -57,6 +57,17 @@ export const DemoDataGenerator: React.FC<DemoDataGeneratorProps> = ({ onEventSen
     console.log('[DemoDataGen] Payload:', { text: itemText, category, budgetEstimate: budget });
 
     try {
+      // Extract child name and age from child ID for better AI recommendations
+      // e.g., "child-emma-2015" -> name: "Emma", age: calculated from year
+      const childNameMatch = childId.match(/child-(\w+)-(\d{4})/);
+      let childName: string | undefined;
+      let childAge: number | undefined;
+      if (childNameMatch) {
+        childName = childNameMatch[1].charAt(0).toUpperCase() + childNameMatch[1].slice(1);
+        const birthYear = parseInt(childNameMatch[2]);
+        childAge = new Date().getFullYear() - birthYear;
+      }
+
       const response = await fetch(`${API_URL}/api/v1/children/${childId}/wishlist-items`, {
         method: 'POST',
         headers: {
@@ -67,6 +78,8 @@ export const DemoDataGenerator: React.FC<DemoDataGeneratorProps> = ({ onEventSen
           text: itemText,
           category: category,
           budgetEstimate: budget,
+          ...(childName && { childName }),
+          ...(childAge && { childAge }),
         }),
       });
 

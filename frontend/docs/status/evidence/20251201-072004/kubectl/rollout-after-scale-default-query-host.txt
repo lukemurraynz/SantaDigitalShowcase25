@@ -1,3 +1,0 @@
-Waiting for deployment "default-query-host" rollout to finish: 0 of 1 updated replicas are available...
-error: timed out waiting for the condition
-

@@ -10,7 +10,7 @@ namespace Services
 {
   // Prompt constants for the various Elf agents.
   public static class ElfAgentPrompts
-{
+  {
     public const string ElfProfileAgentSystemPrompt = """
 You are the Elf Profile Agent for Santa's workshop.
 Your job is to build a consolidated child profile from the data you are given,
@@ -131,7 +131,7 @@ Align overallStatus with the item-level results:
 Keep explanations short, factual, and auditable, suitable for Santa's dashboard
 and notifications.
 """;
-}
+  }
 
   // Lightweight orchestration wrapper for Elf-related agents.
   // This is intentionally minimal and keeps the rest of the codebase
@@ -182,6 +182,11 @@ and notifications.
     private readonly IStreamBroadcaster _broadcaster;
     private readonly IMetricsService _metrics;
 
+    // PERFORMANCE: Track recent recommendation generation to prevent duplicate work
+    // when both direct trigger and Drasi reaction fire simultaneously
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> _recentGenerations = new();
+    private readonly TimeSpan _dedupeWindow = TimeSpan.FromSeconds(10);
+
     public ElfAgentOrchestrator(
       AIAgent agent,
       IOptions<ElfRecommendationAgentOptions> options,
@@ -220,8 +225,10 @@ and notifications.
 
     public async Task<string> GenerateRecommendationRationaleAsync(string childId, string suggestion, CancellationToken ct = default)
     {
-      if (string.IsNullOrWhiteSpace(childId)) throw new ArgumentException("ChildId is required.", nameof(childId));
-      if (string.IsNullOrWhiteSpace(suggestion)) throw new ArgumentException("Suggestion is required.", nameof(suggestion));
+      if (string.IsNullOrWhiteSpace(childId))
+        throw new ArgumentException("ChildId is required.", nameof(childId));
+      if (string.IsNullOrWhiteSpace(suggestion))
+        throw new ArgumentException("Suggestion is required.", nameof(suggestion));
 
       var prompt = $"""
 ChildId: {childId}
@@ -272,12 +279,41 @@ You are the Elf Recommendation Agent. Produce a short, honest rationale (1-3 sen
       await _profiles.StoreAsync(snapshot);
       await _broadcaster.PublishAsync(childId, "profile-updated", new { snapshot.id, snapshot.BehaviorSummary, snapshot.BudgetCeiling }, ct);
       _metrics.Increment("agent_profile_runs");
-      if (fallback) _metrics.Increment("agent_profile_fallback");
+      if (fallback)
+        _metrics.Increment("agent_profile_fallback");
       _metrics.ObserveLatency("agent_profile_duration", sw.Elapsed);
     }
 
     public async Task RunRecommendationGenerationAsync(string childId, CancellationToken ct = default)
     {
+      _logger.LogInformation("🔵 RunRecommendationGenerationAsync called for {ChildId}", childId);
+
+      // PERFORMANCE: Deduplicate concurrent requests (direct trigger + Drasi reaction)
+      var now = DateTime.UtcNow;
+      if (_recentGenerations.TryGetValue(childId, out var lastGen))
+      {
+        var elapsed = now - lastGen;
+        if (elapsed < _dedupeWindow)
+        {
+          _logger.LogInformation("⏭️ Skipping duplicate recommendation generation for {ChildId} (last run {Elapsed}s ago)",
+            childId, elapsed.TotalSeconds);
+          _metrics.Increment("agent_recommendation_deduped");
+          return;
+        }
+      }
+
+      _recentGenerations[childId] = now;
+
+      // Clean up old entries (keep dictionary bounded)
+      var cutoff = now.AddSeconds(-30);
+      var staleKeys = _recentGenerations.Where(kvp => kvp.Value < cutoff).Select(kvp => kvp.Key).ToList();
+      foreach (var key in staleKeys)
+      {
+        _recentGenerations.TryRemove(key, out _);
+      }
+
+      _logger.LogInformation("🔵 Starting recommendation generation for {ChildId} - deduplication passed", childId);
+      var sw = System.Diagnostics.Stopwatch.StartNew();
       var recs = await _recOrchestrator.GenerateAsync(childId, topN: 3, ct);
       var set = new RecommendationSetEntity
       {
@@ -297,13 +333,18 @@ You are the Elf Recommendation Agent. Produce a short, honest rationale (1-3 sen
       await _recRepo.StoreAsync(set);
       await _broadcaster.PublishAsync(childId, "recommendations-generated", new { set.id, items = recs.Select(r => new { r.Id, r.Suggestion }) }, ct);
       _metrics.Increment("agent_recommendation_runs");
+      sw.Stop();
+      _logger.LogInformation("✅ Recommendation generation completed for {ChildId} in {ElapsedMs}ms",
+        childId, sw.ElapsedMilliseconds);
+      _metrics.ObserveLatency("agent_recommendation_duration", sw.Elapsed);
     }
 
     public async Task RunLogisticsAssessmentAsync(string childId, CancellationToken ct = default)
     {
       var sw = System.Diagnostics.Stopwatch.StartNew();
       var assessment = await _logistics.RunAssessmentAsync(childId, ct);
-      if (assessment is null) return;
+      if (assessment is null)
+        return;
       var entity = new LogisticsAssessmentEntity
       {
         ChildId = assessment.ChildId,
@@ -321,7 +362,8 @@ You are the Elf Recommendation Agent. Produce a short, honest rationale (1-3 sen
       await _logisticsRepo.StoreAsync(entity);
       await _broadcaster.PublishAsync(childId, "logistics-assessed", new { entity.id, entity.OverallStatus }, ct);
       _metrics.Increment("agent_logistics_runs");
-      if (assessment.FallbackUsed) _metrics.Increment("agent_logistics_fallback");
+      if (assessment.FallbackUsed)
+        _metrics.Increment("agent_logistics_fallback");
       _metrics.ObserveLatency("agent_logistics_duration", sw.Elapsed);
     }
 
