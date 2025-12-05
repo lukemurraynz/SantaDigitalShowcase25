@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-    name: drasi-resources-placeholder
-    namespace: default
-data:
-    note: "Drasi resources applied via postdeploy hook, placeholder ignored."
