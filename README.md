@@ -11,27 +11,27 @@ Santa's Digital Elves is an event-driven demo application that detects wishlist 
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Backend** | C# / .NET 9 with ASP.NET Core Minimal APIs |
-| **Frontend** | TypeScript with Vite + React |
-| **Database** | Azure Cosmos DB (Core/NoSQL) |
-| **Event Processing** | Drasi for real-time event detection, Azure Event Hubs |
-| **AI Framework** | Azure OpenAI with Microsoft Agent Framework (.NET preview) |
-| **Infrastructure** | Azure Container Apps, Azure Key Vault, AKS for Drasi |
-| **Scripting** | PowerShell for deployment and automation |
+| Layer                | Technology                                                 |
+| -------------------- | ---------------------------------------------------------- |
+| **Backend**          | C# / .NET 9 with ASP.NET Core Minimal APIs                 |
+| **Frontend**         | TypeScript with Vite + React                               |
+| **Database**         | Azure Cosmos DB (Core/NoSQL)                               |
+| **Event Processing** | Drasi for real-time event detection, Azure Event Hubs      |
+| **AI Framework**     | Azure OpenAI with Microsoft Agent Framework (.NET preview) |
+| **Infrastructure**   | Azure Container Apps, Azure Key Vault, AKS for Drasi       |
+| **Scripting**        | PowerShell for deployment and automation                   |
 
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
 
-- **Azure CLI** (`az`) – [Install guide](https://docs.microsoft.com/cli/azure/install-azure-cli)
-- **Azure Developer CLI** (`azd`) – [Install guide](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)
-- **.NET SDK 9** – [Download](https://dotnet.microsoft.com/download/dotnet/9.0)
+- **Azure CLI** (`az`) – [Install guide](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest&WT.mc_id=AZ-MVP-5004796)
+- **Azure Developer CLI** (`azd`) – [Install guide](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd?tabs=winget-windows%2Cbrew-mac%2Cscript-linux&pivots=os-windows&WT.mc_id=AZ-MVP-5004796)
+- **.NET SDK 9** – [Download](https://dotnet.microsoft.com/download/dotnet/9.0?WT.mc_id=AZ-MVP-5004796)
 - **Node.js 18+** – [Download](https://nodejs.org/)
 - **Docker** (optional, for local container builds)
 - **kubectl** – [Install guide](https://kubernetes.io/docs/tasks/tools/)
-- **Drasi CLI** – [Install guide](https://drasi.io/docs/getting-started/installation/)
+- **Drasi CLI** – [Install guide](https://drasi.io/)
 
 ## 🚀 Quick Start Deployment
 
@@ -140,23 +140,23 @@ dotnet test
 
 ### Health Endpoints
 
-| Endpoint | Purpose |
-|----------|---------|
-| `/healthz` | Liveness check |
-| `/readyz` | Readiness check |
+| Endpoint     | Purpose             |
+| ------------ | ------------------- |
+| `/healthz`   | Liveness check      |
+| `/readyz`    | Readiness check     |
 | `/api/pingz` | Diagnostics payload |
 
 ### Core API Endpoints (v1)
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/children` | GET | List all children |
-| `/api/v1/children/{id}` | GET | Get child details |
-| `/api/v1/children/{id}/wishlist-items` | GET, POST | Manage wishlist items |
-| `/api/v1/reports` | GET | List reports |
-| `/api/v1/elf-agents/{agentId}/run` | POST | Run AI elf agent (SSE) |
-| `/api/v1/drasi/insights` | GET | Get Drasi insights |
-| `/api/v1/copilot/chat` | POST | Chat with AI (SSE) |
+| Endpoint                               | Method    | Description            |
+| -------------------------------------- | --------- | ---------------------- |
+| `/api/v1/children`                     | GET       | List all children      |
+| `/api/v1/children/{id}`                | GET       | Get child details      |
+| `/api/v1/children/{id}/wishlist-items` | GET, POST | Manage wishlist items  |
+| `/api/v1/reports`                      | GET       | List reports           |
+| `/api/v1/elf-agents/{agentId}/run`     | POST      | Run AI elf agent (SSE) |
+| `/api/v1/drasi/insights`               | GET       | Get Drasi insights     |
+| `/api/v1/copilot/chat`                 | POST      | Chat with AI (SSE)     |
 
 ## ⚙️ Configuration
 
@@ -164,12 +164,12 @@ dotnet test
 
 The application uses Azure Key Vault for secrets. Key configuration values:
 
-| Variable | Description |
-|----------|-------------|
-| `KEYVAULT_URI` | Azure Key Vault URI |
-| `COSMOS_ENDPOINT` | Cosmos DB endpoint |
-| `OPENAI_ENDPOINT` | Azure OpenAI endpoint |
-| `EVENTHUB_FQDN` | Event Hub namespace FQDN |
+| Variable          | Description              |
+| ----------------- | ------------------------ |
+| `KEYVAULT_URI`    | Azure Key Vault URI      |
+| `COSMOS_ENDPOINT` | Cosmos DB endpoint       |
+| `OPENAI_ENDPOINT` | Azure OpenAI endpoint    |
+| `EVENTHUB_FQDN`   | Event Hub namespace FQDN |
 
 ### Drasi Configuration
 
@@ -188,11 +188,13 @@ drasi apply -f drasi/manifests/drasi-resources.yaml
 ### Common Issues
 
 1. **API returns 404**: Container App may still be using bootstrap image
+
    ```powershell
    azd deploy api
    ```
 
 2. **Drasi pods in CrashLoopBackOff**: Run the fix script
+
    ```powershell
    $rg = azd env get-value AZURE_RESOURCE_GROUP
    $env = azd env get-value AZURE_ENV_NAME
